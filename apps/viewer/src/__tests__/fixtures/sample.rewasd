@@ -1,47 +1,193 @@
 {
-  "masks": [
-    {
-      "id": 1,
-      "set": [{ "buttonId": 1, "buttonName": "A" }],
-      "description": "A Button Mask"
-    }
-  ],
+  "schemaVersion": 1,
+  "appVersion": "5.0.0",
+  "config": {
+    "name": "Test Config"
+  },
+  "devices": {},
+  "radialMenuCircles": [],
+  "radialMenuSectors": [],
+  "crosshairs": [],
   "shifts": [
     {
       "id": 1,
-      "description": "Default Shift",
-      "type": "normal"
+      "type": "default",
+      "description": "Default"
+    },
+    {
+      "id": 2,
+      "type": "default",
+      "description": "LB Shift"
+    }
+  ],
+  "masks": [
+    {
+      "id": 1,
+      "set": [
+        {
+          "deviceId": 0,
+          "buttonId": 1,
+          "description": "A"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "set": [
+        {
+          "deviceId": 0,
+          "buttonId": 2,
+          "description": "B"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "set": [
+        {
+          "deviceId": 0,
+          "buttonId": 3,
+          "description": "X"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "set": [
+        {
+          "deviceId": 0,
+          "buttonId": 4,
+          "description": "Y"
+        }
+      ]
     }
   ],
   "mappings": [
     {
-      "maskId": 0,
-      "shiftId": 1,
-      "buttonId": 1,
-      "action": {
-        "type": "keyboard",
-        "dikCode": 30
-      }
+      "description": "A → W (forward)",
+      "condition": {
+        "shiftId": 1,
+        "mask": {
+          "id": 1,
+          "activator": {
+            "type": "single",
+            "mode": "hold_until_release"
+          }
+        }
+      },
+      "macros": [
+        {
+          "keyboard": {
+            "buttonId": 17,
+            "description": "W"
+          }
+        }
+      ]
     },
     {
-      "maskId": 0,
-      "shiftId": 1,
-      "buttonId": 2,
-      "action": {
-        "type": "keyboard",
-        "dikCode": 48
-      }
+      "description": "B → S (backward)",
+      "condition": {
+        "shiftId": 1,
+        "mask": {
+          "id": 2,
+          "activator": {
+            "type": "single",
+            "mode": "hold_until_release"
+          }
+        }
+      },
+      "macros": [
+        {
+          "keyboard": {
+            "buttonId": 31,
+            "description": "S"
+          }
+        }
+      ]
     },
     {
-      "maskId": 1,
-      "shiftId": 1,
-      "buttonId": 3,
-      "action": {
-        "type": "macro",
-        "steps": [
-          { "dikCode": 17, "delay": 50 },
-          { "dikCode": 31, "delay": 100 }
-        ]
+      "description": "X → A (strafe left)",
+      "condition": {
+        "shiftId": 1,
+        "mask": {
+          "id": 3,
+          "activator": {
+            "type": "single",
+            "mode": "hold_until_release"
+          }
+        }
+      },
+      "macros": [
+        {
+          "keyboard": {
+            "buttonId": 30,
+            "description": "A"
+          }
+        }
+      ]
+    },
+    {
+      "description": "Y long press → F",
+      "condition": {
+        "shiftId": 1,
+        "mask": {
+          "id": 4,
+          "activator": {
+            "type": "long",
+            "mode": "onetime"
+          }
+        }
+      },
+      "macros": [
+        {
+          "keyboard": {
+            "buttonId": 33,
+            "description": "F"
+          }
+        }
+      ]
+    },
+    {
+      "description": "LB + A → Shift+W (boost)",
+      "condition": {
+        "shiftId": 2,
+        "mask": {
+          "id": 1,
+          "activator": {
+            "type": "single",
+            "mode": "hold_until_release"
+          }
+        }
+      },
+      "macros": [
+        {
+          "keyboard": {
+            "buttonId": 42,
+            "description": "LShift"
+          }
+        },
+        {
+          "keyboard": {
+            "buttonId": 17,
+            "description": "W"
+          }
+        }
+      ]
+    },
+    {
+      "description": "Layer jump mapping (should be skipped)",
+      "condition": {
+        "shiftId": 1,
+        "mask": {
+          "id": 4,
+          "activator": {
+            "type": "single",
+            "mode": "onetime"
+          }
+        }
+      },
+      "jumpToLayer": {
+        "layer": 2
       }
     }
   ]
