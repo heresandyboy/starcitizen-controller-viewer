@@ -14,6 +14,15 @@ import type {
   ActivationMode,
 } from '../types/starcitizen';
 import { SC_GAMEPAD_BUTTONS } from '../types/starcitizen';
+import type {
+  GameAction,
+  GameActionBindings,
+  KeyboardBinding,
+  MouseBinding,
+  DirectGamepadBinding,
+  GameplayMode,
+} from '../types/unified';
+import { getActionDisplayName, getGameplayMode } from '../constants/scActions';
 
 // ============================================================================
 // Input String Parsing
@@ -321,4 +330,112 @@ export function filterByInputType(
   inputType: InputDeviceType
 ): ParsedXmlBinding[] {
   return bindings.filter((b) => b.inputType === inputType);
+}
+
+// ============================================================================
+// GameAction Parsing (Action-Centered)
+// ============================================================================
+
+/**
+ * Result of parsing XML into GameAction objects
+ */
+export interface ParseXmlToActionsResult {
+  actions: GameAction[];
+  profileName: string;
+  errors: string[];
+}
+
+/**
+ * Convert a ParsedXmlBinding to a KeyboardBinding
+ */
+function toKeyboardBinding(binding: ParsedXmlBinding): KeyboardBinding {
+  return {
+    key: binding.inputKey,
+    modifier: binding.modifiers.length > 0 ? binding.modifiers[0] : undefined,
+  };
+}
+
+/**
+ * Convert a ParsedXmlBinding to a MouseBinding
+ */
+function toMouseBinding(binding: ParsedXmlBinding): MouseBinding {
+  return {
+    input: binding.inputKey,
+    modifier: binding.modifiers.length > 0 ? binding.modifiers[0] : undefined,
+  };
+}
+
+/**
+ * Convert a ParsedXmlBinding to a DirectGamepadBinding
+ */
+function toGamepadBinding(binding: ParsedXmlBinding): DirectGamepadBinding {
+  return {
+    input: binding.inputKey,
+    modifier: binding.modifiers.length > 0 ? binding.modifiers[0] : undefined,
+    activationMode: binding.activationMode,
+  };
+}
+
+/**
+ * Parse Star Citizen XML and return action-centered GameAction objects.
+ * This groups all bindings (keyboard, mouse, gamepad) under each unique action.
+ * 
+ * @param xmlString - The Star Citizen actionmaps.xml content
+ * @returns Actions grouped by game action, with all input bindings collected
+ */
+export function parseXmlToGameActions(xmlString: string): ParseXmlToActionsResult {
+  // First parse using existing function
+  const parseResult = parseStarCitizenXml(xmlString);
+  
+  // Group bindings by actionMap + actionName
+  const actionBindingsMap = new Map<string, ParsedXmlBinding[]>();
+  for (const binding of parseResult.bindings) {
+    const key = `${binding.actionMap}::${binding.actionName}`;
+    const existing = actionBindingsMap.get(key) ?? [];
+    existing.push(binding);
+    actionBindingsMap.set(key, existing);
+  }
+  
+  // Convert to GameAction objects
+  const actions: GameAction[] = [];
+  for (const [key, bindings] of actionBindingsMap) {
+    const [actionMap, actionName] = key.split('::');
+    const category = getGameplayMode(actionMap);
+    const displayName = getActionDisplayName(actionName);
+    
+    // Separate bindings by input type
+    const keyboardBindings = bindings.filter(b => b.inputType === 'keyboard');
+    const mouseBindings = bindings.filter(b => b.inputType === 'mouse');
+    const gamepadBindings = bindings.filter(b => 
+      b.inputType === 'gamepad' || b.inputType === 'joystick'
+    );
+    
+    // Build the bindings object, only including non-empty arrays
+    const actionBindings: GameActionBindings = {};
+    if (keyboardBindings.length > 0) {
+      actionBindings.keyboard = keyboardBindings.map(toKeyboardBinding);
+    }
+    if (mouseBindings.length > 0) {
+      actionBindings.mouse = mouseBindings.map(toMouseBinding);
+    }
+    if (gamepadBindings.length > 0) {
+      actionBindings.gamepad = gamepadBindings.map(toGamepadBinding);
+    }
+    
+    const action: GameAction = {
+      name: actionName,
+      displayName,
+      actionMap,
+      category,
+      bindings: actionBindings,
+    };
+    
+    actions.push(action);
+  }
+  
+  return { 
+    actions, 
+    profileName: parseResult.profileName, 
+    errors: parseResult.errors 
+  };
 }

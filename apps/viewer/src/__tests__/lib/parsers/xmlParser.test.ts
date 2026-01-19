@@ -8,6 +8,7 @@ import {
   buildGamepadToActionMap,
   getActionMapNames,
   filterByInputType,
+  parseXmlToGameActions,
 } from '@/lib/parsers/xmlParser'
 import { loadSampleActionMaps } from '@/test/fixtures'
 
@@ -355,6 +356,148 @@ describe('xmlParser', () => {
       const mouse = filterByInputType(bindings, 'mouse')
 
       expect(mouse.every((b) => b.inputType === 'mouse')).toBe(true)
+    })
+  })
+
+  describe('parseXmlToGameActions', () => {
+    it('parses XML into GameAction objects', () => {
+      const xml = loadSampleActionMaps()
+      const result = parseXmlToGameActions(xml)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.actions.length).toBeGreaterThan(0)
+    })
+
+    it('groups bindings by action name', () => {
+      const xml = loadSampleActionMaps()
+      const result = parseXmlToGameActions(xml)
+
+      // Each action object should have required structure
+      // Note: same action name could appear in different action maps
+      expect(result.actions.every((a) => a.name && a.actionMap)).toBe(true)
+
+      // Verify actions are grouped (action+actionMap combination is unique)
+      const actionKeys = result.actions.map((a) => `${a.actionMap}::${a.name}`)
+      const uniqueKeys = new Set(actionKeys)
+      expect(uniqueKeys.size).toBe(actionKeys.length)
+    })
+
+    it('includes keyboard bindings in actions', () => {
+      const xml = loadSampleActionMaps()
+      const result = parseXmlToGameActions(xml)
+
+      const actionsWithKeyboard = result.actions.filter(
+        (a) => a.bindings.keyboard && a.bindings.keyboard.length > 0
+      )
+      expect(actionsWithKeyboard.length).toBeGreaterThan(0)
+
+      // Check structure of keyboard bindings
+      const firstWithKeyboard = actionsWithKeyboard[0]
+      expect(firstWithKeyboard.bindings.keyboard![0]).toHaveProperty('key')
+    })
+
+    it('includes gamepad bindings in actions', () => {
+      const xml = loadSampleActionMaps()
+      const result = parseXmlToGameActions(xml)
+
+      const actionsWithGamepad = result.actions.filter(
+        (a) => a.bindings.gamepad && a.bindings.gamepad.length > 0
+      )
+      expect(actionsWithGamepad.length).toBeGreaterThan(0)
+
+      // Check structure of gamepad bindings
+      const firstWithGamepad = actionsWithGamepad[0]
+      expect(firstWithGamepad.bindings.gamepad![0]).toHaveProperty('input')
+    })
+
+    it('sets displayName from SC_ACTION_NAMES or formats it', () => {
+      const xml = loadSampleActionMaps()
+      const result = parseXmlToGameActions(xml)
+
+      // All actions should have displayName
+      expect(result.actions.every((a) => a.displayName)).toBe(true)
+
+      // Find a known action and check its display name
+      const strafeForward = result.actions.find((a) => a.name === 'v_strafe_forward')
+      if (strafeForward) {
+        expect(strafeForward.displayName).toBe('Strafe Forward')
+      }
+    })
+
+    it('sets category from action map', () => {
+      const xml = loadSampleActionMaps()
+      const result = parseXmlToGameActions(xml)
+
+      // All actions should have category
+      expect(result.actions.every((a) => a.category)).toBe(true)
+
+      // Flight actions should have Flight category
+      const flightActions = result.actions.filter((a) => a.actionMap.startsWith('spaceship_'))
+      expect(flightActions.some((a) => a.category === 'Flight')).toBe(true)
+    })
+
+    it('handles actions with both keyboard and gamepad bindings', () => {
+      const xml = loadSampleActionMaps()
+      const result = parseXmlToGameActions(xml)
+
+      const actionsWithBoth = result.actions.filter(
+        (a) =>
+          a.bindings.keyboard &&
+          a.bindings.keyboard.length > 0 &&
+          a.bindings.gamepad &&
+          a.bindings.gamepad.length > 0
+      )
+
+      // Some actions should have both input types
+      expect(actionsWithBoth.length).toBeGreaterThan(0)
+    })
+
+    it('handles empty XML', () => {
+      const emptyXml = '<?xml version="1.0"?><ActionMaps></ActionMaps>'
+      const result = parseXmlToGameActions(emptyXml)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.actions).toHaveLength(0)
+    })
+
+    it('handles malformed XML', () => {
+      const malformedXml = '<ActionMaps><actionmap name="test"><broken'
+      const result = parseXmlToGameActions(malformedXml)
+
+      expect(result.errors.length).toBeGreaterThan(0)
+      expect(result.actions).toHaveLength(0)
+    })
+
+    it('preserves activation modes in gamepad bindings when present', () => {
+      // Create XML with activation mode
+      const xmlWithActivation = `<?xml version="1.0"?>
+        <ActionMaps profileName="test">
+          <actionmap name="spaceship_view">
+            <action name="v_view_mode">
+              <rebind input="gp1_thumbr" activationMode="double_tap" />
+            </action>
+          </actionmap>
+        </ActionMaps>`
+      const result = parseXmlToGameActions(xmlWithActivation)
+
+      const viewModeAction = result.actions.find((a) => a.name === 'v_view_mode')
+      expect(viewModeAction).toBeDefined()
+      expect(viewModeAction!.bindings.gamepad).toBeDefined()
+      expect(viewModeAction!.bindings.gamepad![0].activationMode).toBe('double_tap')
+    })
+
+    it('preserves modifiers in bindings', () => {
+      const xml = loadSampleActionMaps()
+      const result = parseXmlToGameActions(xml)
+
+      // Find actions with modifier bindings
+      const actionsWithModifiers = result.actions.filter(
+        (a) =>
+          (a.bindings.keyboard && a.bindings.keyboard.some((b) => b.modifier)) ||
+          (a.bindings.gamepad && a.bindings.gamepad.some((b) => b.modifier))
+      )
+
+      expect(actionsWithModifiers.length).toBeGreaterThan(0)
     })
   })
 })
