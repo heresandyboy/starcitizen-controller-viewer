@@ -11,7 +11,13 @@
 
 import type { ParsedRewasdMapping } from '../types/rewasd';
 import type { ParsedXmlBinding } from '../types/starcitizen';
-import type { UnifiedMapping, GameplayMode, MappingSource } from '../types/unified';
+import type {
+  UnifiedMapping,
+  GameplayMode,
+  MappingSource,
+  GameAction,
+  RewasdTrigger,
+} from '../types/unified';
 import { getActionDisplayName, getGameplayMode } from '../constants/scActions';
 import {
   parseRewasdConfig,
@@ -204,6 +210,110 @@ export function parseAndResolve(
   const xmlResult = parseStarCitizenXml(xmlString);
 
   return resolveChain(rewasdResult, xmlResult);
+}
+
+// ============================================================================
+// GameAction reWASD Integration (Optional Overlay)
+// ============================================================================
+
+/**
+ * Build a lookup map from keyboard key → reWASD mappings that output that key.
+ * This enables reverse lookup: given a keyboard key, find which controller buttons trigger it.
+ */
+export function buildKeyToRewasdMap(
+  rewasdMappings: ParsedRewasdMapping[]
+): Map<string, ParsedRewasdMapping[]> {
+  const map = new Map<string, ParsedRewasdMapping[]>();
+
+  for (const mapping of rewasdMappings) {
+    for (const key of mapping.outputKeys) {
+      const normalizedKey = key.toLowerCase();
+      const existing = map.get(normalizedKey) ?? [];
+      existing.push(mapping);
+      map.set(normalizedKey, existing);
+    }
+  }
+
+  return map;
+}
+
+/**
+ * Convert a ParsedRewasdMapping to a RewasdTrigger for attachment to a GameAction.
+ */
+function toRewasdTrigger(rewasd: ParsedRewasdMapping): RewasdTrigger {
+  return {
+    controllerButton: rewasd.buttonName,
+    modifier: rewasd.shiftName,
+    activationType: rewasd.activatorType,
+    activationMode: rewasd.activatorMode,
+    description: rewasd.description,
+    outputKeys: rewasd.outputKeys,
+  };
+}
+
+/**
+ * Add reWASD triggers to GameActions based on matching keyboard bindings.
+ * 
+ * This function implements the "optional overlay" pattern:
+ * - Primary: SC XML bindings define game actions
+ * - Secondary: reWASD mappings optionally add controller triggers
+ * 
+ * A reWASD mapping is added as a trigger when its keyboard output matches
+ * a keyboard binding on the GameAction.
+ * 
+ * @param actions - GameActions from parseXmlToGameActions()
+ * @param rewasdResult - Optional reWASD parsing result
+ * @returns GameActions with rewasdTriggers attached where applicable
+ */
+export function addRewasdTriggersToActions(
+  actions: GameAction[],
+  rewasdResult: ParseRewasdResult | null
+): GameAction[] {
+  // If no reWASD data, return actions unchanged
+  if (!rewasdResult || rewasdResult.mappings.length === 0) {
+    return actions;
+  }
+
+  // Build reverse lookup: keyboard key → reWASD mappings
+  const keyToRewasd = buildKeyToRewasdMap(rewasdResult.mappings);
+
+  // Process each action
+  return actions.map((action) => {
+    // Skip actions without keyboard bindings
+    if (!action.bindings.keyboard || action.bindings.keyboard.length === 0) {
+      return action;
+    }
+
+    // Find reWASD triggers for this action's keyboard bindings
+    const triggers: RewasdTrigger[] = [];
+    const seenTriggers = new Set<string>(); // Avoid duplicates
+
+    for (const keyboardBinding of action.bindings.keyboard) {
+      const normalizedKey = keyboardBinding.key.toLowerCase();
+      const rewasdMappings = keyToRewasd.get(normalizedKey);
+
+      if (rewasdMappings) {
+        for (const rewasdMapping of rewasdMappings) {
+          // Create unique key for deduplication
+          const triggerKey = `${rewasdMapping.buttonName}:${rewasdMapping.shiftName ?? ''}:${rewasdMapping.activatorType}`;
+          if (!seenTriggers.has(triggerKey)) {
+            seenTriggers.add(triggerKey);
+            triggers.push(toRewasdTrigger(rewasdMapping));
+          }
+        }
+      }
+    }
+
+    // Return action with triggers if any found
+    if (triggers.length > 0) {
+      return {
+        ...action,
+        rewasdTriggers: triggers,
+      };
+    }
+
+    return action;
+  });
 }
 
 // ============================================================================

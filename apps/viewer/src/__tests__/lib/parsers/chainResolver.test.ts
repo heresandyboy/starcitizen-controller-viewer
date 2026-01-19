@@ -10,7 +10,10 @@ import {
   groupByMode,
   groupByModifier,
   searchMappings,
+  buildKeyToRewasdMap,
+  addRewasdTriggersToActions,
 } from '@/lib/parsers/chainResolver'
+import type { GameAction } from '@/lib/types/unified'
 import { parseRewasdConfig } from '@/lib/parsers/rewasdParser'
 import { parseStarCitizenXml } from '@/lib/parsers/xmlParser'
 import type { RewasdConfig } from '@/lib/types/rewasd'
@@ -407,6 +410,228 @@ describe('chainResolver', () => {
       const results = searchMappings(mappings, 'zzz')
 
       expect(results).toHaveLength(0)
+    })
+  })
+
+  describe('buildKeyToRewasdMap', () => {
+    it('builds reverse lookup from keyboard key to reWASD mappings', () => {
+      const rewasdConfig = loadSampleRewasd() as RewasdConfig
+      const rewasdResult = parseRewasdConfig(rewasdConfig)
+
+      const keyMap = buildKeyToRewasdMap(rewasdResult.mappings)
+
+      // Should have entries for output keys
+      expect(keyMap.size).toBeGreaterThan(0)
+    })
+
+    it('maps keys to multiple reWASD mappings when applicable', () => {
+      // Create two reWASD mappings that both output 'F7'
+      const mockMappings = [
+        {
+          buttonName: 'A',
+          shiftName: undefined,
+          activatorType: 'single' as const,
+          activatorMode: 'onetime' as const,
+          outputKeys: ['F7'],
+        },
+        {
+          buttonName: 'B',
+          shiftName: 'LB',
+          activatorType: 'single' as const,
+          activatorMode: 'onetime' as const,
+          outputKeys: ['F7'],
+        },
+      ]
+
+      const keyMap = buildKeyToRewasdMap(mockMappings)
+
+      expect(keyMap.get('f7')?.length).toBe(2)
+    })
+
+    it('handles mappings with multiple output keys', () => {
+      const mockMappings = [
+        {
+          buttonName: 'A',
+          shiftName: undefined,
+          activatorType: 'single' as const,
+          activatorMode: 'onetime' as const,
+          outputKeys: ['F7', 'F11', 'F3'],
+        },
+      ]
+
+      const keyMap = buildKeyToRewasdMap(mockMappings)
+
+      // Each output key should map to the same reWASD mapping
+      expect(keyMap.get('f7')).toBeDefined()
+      expect(keyMap.get('f11')).toBeDefined()
+      expect(keyMap.get('f3')).toBeDefined()
+    })
+  })
+
+  describe('addRewasdTriggersToActions', () => {
+    const createMockAction = (overrides: Partial<GameAction> = {}): GameAction => ({
+      name: 'v_test_action',
+      displayName: 'Test Action',
+      actionMap: 'spaceship_general',
+      category: 'Flight',
+      bindings: {},
+      ...overrides,
+    })
+
+    it('returns actions unchanged when no reWASD data', () => {
+      const actions: GameAction[] = [
+        createMockAction({ bindings: { keyboard: [{ key: 'F7' }] } }),
+      ]
+
+      const result = addRewasdTriggersToActions(actions, null)
+
+      expect(result).toEqual(actions)
+      expect(result[0].rewasdTriggers).toBeUndefined()
+    })
+
+    it('returns actions unchanged when reWASD has no mappings', () => {
+      const actions: GameAction[] = [
+        createMockAction({ bindings: { keyboard: [{ key: 'F7' }] } }),
+      ]
+
+      const result = addRewasdTriggersToActions(actions, { mappings: [], errors: [] })
+
+      expect(result[0].rewasdTriggers).toBeUndefined()
+    })
+
+    it('adds reWASD triggers when keyboard binding matches', () => {
+      const actions: GameAction[] = [
+        createMockAction({
+          name: 'v_toggle_scan_mode',
+          bindings: { keyboard: [{ key: 'Tab' }] }
+        }),
+      ]
+
+      const rewasdResult = {
+        mappings: [
+          {
+            buttonName: 'A',
+            shiftName: undefined,
+            activatorType: 'single' as const,
+            activatorMode: 'onetime' as const,
+            outputKeys: ['Tab'],
+            description: 'Toggle scan',
+          },
+        ],
+        errors: [],
+      }
+
+      const result = addRewasdTriggersToActions(actions, rewasdResult)
+
+      expect(result[0].rewasdTriggers).toBeDefined()
+      expect(result[0].rewasdTriggers?.length).toBe(1)
+      expect(result[0].rewasdTriggers?.[0].controllerButton).toBe('A')
+      expect(result[0].rewasdTriggers?.[0].outputKeys).toEqual(['Tab'])
+    })
+
+    it('does not add triggers for actions without keyboard bindings', () => {
+      const actions: GameAction[] = [
+        createMockAction({
+          name: 'v_gamepad_only',
+          bindings: { gamepad: [{ input: 'A' }] }
+        }),
+      ]
+
+      const rewasdResult = {
+        mappings: [
+          {
+            buttonName: 'A',
+            shiftName: undefined,
+            activatorType: 'single' as const,
+            activatorMode: 'onetime' as const,
+            outputKeys: ['Tab'],
+          },
+        ],
+        errors: [],
+      }
+
+      const result = addRewasdTriggersToActions(actions, rewasdResult)
+
+      expect(result[0].rewasdTriggers).toBeUndefined()
+    })
+
+    it('preserves modifier information in triggers', () => {
+      const actions: GameAction[] = [
+        createMockAction({
+          bindings: { keyboard: [{ key: 'Space' }] }
+        }),
+      ]
+
+      const rewasdResult = {
+        mappings: [
+          {
+            buttonName: 'X',
+            shiftName: 'LB',
+            activatorType: 'long' as const,
+            activatorMode: 'turbo' as const,
+            outputKeys: ['Space'],
+            description: 'Jump',
+          },
+        ],
+        errors: [],
+      }
+
+      const result = addRewasdTriggersToActions(actions, rewasdResult)
+
+      const trigger = result[0].rewasdTriggers?.[0]
+      expect(trigger?.modifier).toBe('LB')
+      expect(trigger?.activationType).toBe('long')
+      expect(trigger?.activationMode).toBe('turbo')
+      expect(trigger?.description).toBe('Jump')
+    })
+
+    it('deduplicates triggers for same button+modifier+type', () => {
+      const actions: GameAction[] = [
+        createMockAction({
+          bindings: { keyboard: [{ key: 'F7' }, { key: 'F7', modifier: 'lshift' }] }
+        }),
+      ]
+
+      const rewasdResult = {
+        mappings: [
+          {
+            buttonName: 'A',
+            shiftName: undefined,
+            activatorType: 'single' as const,
+            activatorMode: 'onetime' as const,
+            outputKeys: ['F7'],
+          },
+        ],
+        errors: [],
+      }
+
+      const result = addRewasdTriggersToActions(actions, rewasdResult)
+
+      // Should only have one trigger even though F7 appears in two keyboard bindings
+      expect(result[0].rewasdTriggers?.length).toBe(1)
+    })
+
+    it('works with real sample data', () => {
+      const rewasdConfig = loadSampleRewasd() as RewasdConfig
+      const rewasdResult = parseRewasdConfig(rewasdConfig)
+
+      // Create actions from sample XML
+      const xmlContent = loadSampleActionMaps()
+      const xmlResult = parseStarCitizenXml(xmlContent)
+
+      // Convert to GameAction format (simple conversion for test)
+      const actions: GameAction[] = xmlResult.bindings
+        .filter(b => b.inputType === 'keyboard')
+        .slice(0, 10)
+        .map(b => createMockAction({
+          name: b.actionName,
+          bindings: { keyboard: [{ key: b.inputKey }] },
+        }))
+
+      const result = addRewasdTriggersToActions(actions, rewasdResult)
+
+      // Should process without errors
+      expect(result.length).toBe(actions.length)
     })
   })
 })
