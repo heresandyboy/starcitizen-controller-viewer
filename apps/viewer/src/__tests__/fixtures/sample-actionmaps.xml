@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ActionMaps version="1" optionsVersion="2" rebindVersion="2">
+  <actionmap name="spaceship_movement">
+    <action name="v_strafe_forward">
+      <rebind input="kb1_w" />
+      <rebind input="gp1_thumbly" />
+    </action>
+    <action name="v_strafe_back">
+      <rebind input="kb1_s" />
+    </action>
+    <action name="v_strafe_left">
+      <rebind input="kb1_a" />
+    </action>
+    <action name="v_strafe_right">
+      <rebind input="kb1_d" />
+    </action>
+  </actionmap>
+  <actionmap name="spaceship_weapons">
+    <action name="v_attack1">
+      <rebind input="mouse1_1" />
+      <rebind input="gp1_triggerr" />
+    </action>
+    <action name="v_attack2">
+      <rebind input="mouse1_2" />
+      <rebind input="gp1_triggerl" />
+    </action>
+    <action name="v_weapon_cycle_aimmode">
+      <rebind input="kb1_z" />
+      <rebind input="gp1_shoulderl+x" />
+    </action>
+  </actionmap>
+  <actionmap name="spaceship_view">
+    <action name="v_look_ahead_enable">
+      <rebind input="kb1_lalt" activationMode="delayed_press" />
+    </action>
+  </actionmap>
+</ActionMaps>

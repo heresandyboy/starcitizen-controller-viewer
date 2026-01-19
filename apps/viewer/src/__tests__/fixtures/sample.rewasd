@@ -1,0 +1,48 @@
+{
+  "masks": [
+    {
+      "id": 1,
+      "set": [{ "buttonId": 1, "buttonName": "A" }],
+      "description": "A Button Mask"
+    }
+  ],
+  "shifts": [
+    {
+      "id": 1,
+      "description": "Default Shift",
+      "type": "normal"
+    }
+  ],
+  "mappings": [
+    {
+      "maskId": 0,
+      "shiftId": 1,
+      "buttonId": 1,
+      "action": {
+        "type": "keyboard",
+        "dikCode": 30
+      }
+    },
+    {
+      "maskId": 0,
+      "shiftId": 1,
+      "buttonId": 2,
+      "action": {
+        "type": "keyboard",
+        "dikCode": 48
+      }
+    },
+    {
+      "maskId": 1,
+      "shiftId": 1,
+      "buttonId": 3,
+      "action": {
+        "type": "macro",
+        "steps": [
+          { "dikCode": 17, "delay": 50 },
+          { "dikCode": 31, "delay": 100 }
+        ]
+      }
+    }
+  ]
+}
