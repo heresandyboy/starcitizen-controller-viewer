@@ -15,6 +15,22 @@ import type { ActivatorType, ActivatorMode } from './rewasd';
  * A Star Citizen game action with all possible input bindings.
  * This is the primary entity in the action-centered architecture.
  */
+/**
+ * Debug information showing the original XML structure for an action.
+ * Used to help understand how bindings were parsed.
+ */
+export interface XmlDebugInfo {
+  /** Original rebind elements as they appear in the XML */
+  rebinds: Array<{
+    /** The raw input string (e.g., "gp1_back", "kb1_f7") */
+    rawInput: string;
+    /** Activation mode if specified */
+    activationMode?: string;
+    /** Multi-tap count if specified */
+    multiTap?: number;
+  }>;
+}
+
 export interface GameAction {
   /** Internal SC action name (e.g., "v_toggle_mining_mode") */
   name: string;
@@ -30,6 +46,9 @@ export interface GameAction {
   
   /** Optional: reWASD controller inputs that can trigger this action via keyboard output */
   rewasdTriggers?: RewasdTrigger[];
+  
+  /** Optional: Debug information showing original XML structure */
+  xmlDebugInfo?: XmlDebugInfo;
 }
 
 /**

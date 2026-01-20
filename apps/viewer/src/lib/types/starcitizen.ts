@@ -112,6 +112,8 @@ export interface ParsedXmlBinding {
   modifiers: string[];
   activationMode?: ActivationMode;
   multiTap?: number;
+  /** Original input string from XML (e.g., "gp1_back", "kb1_lshift+f7") for debugging */
+  rawInput: string;
 }
 
 // ============================================================================

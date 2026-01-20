@@ -1,6 +1,7 @@
 'use client';
 
-import type { GameAction, KeyboardBinding, MouseBinding, DirectGamepadBinding, RewasdTrigger } from '@/lib/types/unified';
+import { useState } from 'react';
+import type { GameAction, KeyboardBinding, MouseBinding, DirectGamepadBinding, RewasdTrigger, XmlDebugInfo } from '@/lib/types/unified';
 
 interface GameActionCardProps {
   action: GameAction;
@@ -8,6 +9,7 @@ interface GameActionCardProps {
 }
 
 export function GameActionCard({ action, compact = false }: GameActionCardProps) {
+  const [showDebug, setShowDebug] = useState(false);
   const hasKeyboard = action.bindings.keyboard && action.bindings.keyboard.length > 0;
   const hasMouse = action.bindings.mouse && action.bindings.mouse.length > 0;
   const hasGamepad = action.bindings.gamepad && action.bindings.gamepad.length > 0;
@@ -80,6 +82,23 @@ export function GameActionCard({ action, compact = false }: GameActionCardProps)
       {hasRewasd && (
         <div className="mt-4 pt-3 border-t border-zinc-200 dark:border-zinc-700">
           <RewasdSection triggers={action.rewasdTriggers!} />
+        </div>
+      )}
+
+      {/* Debug toggle */}
+      {action.xmlDebugInfo && (
+        <div className="mt-4 pt-3 border-t border-zinc-200 dark:border-zinc-700">
+          <button
+            onClick={() => setShowDebug(!showDebug)}
+            className="text-xs text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 flex items-center gap-1"
+          >
+            <span>{showDebug ? '▼' : '▶'}</span>
+            <span>XML Debug</span>
+          </button>
+          
+          {showDebug && (
+            <XmlDebugSection debugInfo={action.xmlDebugInfo} actionMap={action.actionMap} actionName={action.name} />
+          )}
         </div>
       )}
     </div>
@@ -202,4 +221,45 @@ function formatGamepadBinding(binding: DirectGamepadBinding): string {
     result += ` (${binding.activationMode})`;
   }
   return result;
+}
+
+
+// XML Debug Section
+interface XmlDebugSectionProps {
+  debugInfo: XmlDebugInfo;
+  actionMap: string;
+  actionName: string;
+}
+
+function XmlDebugSection({ debugInfo, actionMap, actionName }: XmlDebugSectionProps) {
+  // Build a formatted XML-like representation
+  const formatXml = () => {
+    const lines: string[] = [];
+    lines.push(`<actionmap name="${actionMap}">`);
+    lines.push(`  <action name="${actionName}">`);
+    
+    for (const rebind of debugInfo.rebinds) {
+      let attrs = `input="${rebind.rawInput}"`;
+      if (rebind.activationMode) {
+        attrs += ` activationMode="${rebind.activationMode}"`;
+      }
+      if (rebind.multiTap) {
+        attrs += ` multiTap="${rebind.multiTap}"`;
+      }
+      lines.push(`    <rebind ${attrs}/>`);
+    }
+    
+    lines.push('  </action>');
+    lines.push('</actionmap>');
+    
+    return lines.join('\n');
+  };
+
+  return (
+    <div className="mt-2">
+      <pre className="text-xs font-mono bg-zinc-100 dark:bg-zinc-800 p-3 rounded overflow-x-auto text-zinc-700 dark:text-zinc-300">
+        {formatXml()}
+      </pre>
+    </div>
+  );
 }

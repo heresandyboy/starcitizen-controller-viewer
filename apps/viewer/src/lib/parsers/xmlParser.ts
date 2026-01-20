@@ -21,6 +21,7 @@ import type {
   MouseBinding,
   DirectGamepadBinding,
   GameplayMode,
+  XmlDebugInfo,
 } from '../types/unified';
 import { getActionDisplayName, getGameplayMode } from '../constants/scActions';
 
@@ -228,6 +229,7 @@ export function parseStarCitizenXml(xmlString: string): ParseXmlResult {
             modifiers: normalizedModifiers,
             activationMode: activationMode ?? undefined,
             multiTap,
+            rawInput: input,
           };
 
           bindings.push(binding);
@@ -422,12 +424,22 @@ export function parseXmlToGameActions(xmlString: string): ParseXmlToActionsResul
       actionBindings.gamepad = gamepadBindings.map(toGamepadBinding);
     }
     
+    // Build debug info from all bindings
+    const xmlDebugInfo: XmlDebugInfo = {
+      rebinds: bindings.map(b => ({
+        rawInput: b.rawInput,
+        activationMode: b.activationMode,
+        multiTap: b.multiTap,
+      })),
+    };
+    
     const action: GameAction = {
       name: actionName,
       displayName,
       actionMap,
       category,
       bindings: actionBindings,
+      xmlDebugInfo,
     };
     
     actions.push(action);
