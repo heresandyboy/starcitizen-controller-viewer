@@ -14,6 +14,7 @@ export {
 // Star Citizen XML parser
 export {
   parseStarCitizenXml,
+  parseXmlToGameActions,
   parseInputString,
   normalizeKeyboardKey,
   normalizeGamepadButton,
@@ -22,6 +23,7 @@ export {
   getActionMapNames,
   filterByInputType,
   type ParseXmlResult,
+  type ParseXmlToActionsResult,
 } from './xmlParser';
 
 // Chain resolver (combines reWASD + XML)
@@ -36,6 +38,8 @@ export {
   groupByMode,
   groupByModifier,
   searchMappings,
+  buildKeyToRewasdMap,
+  addRewasdTriggersToActions,
   type ResolveResult,
   type ResolveStats,
 } from './chainResolver';
