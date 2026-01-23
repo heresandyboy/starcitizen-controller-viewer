@@ -1,0 +1,1214 @@
+<ActionMaps>
+ <ActionProfiles version="1" optionsVersion="2" rebindVersion="2" profileName="default">
+  <deviceoptions name=" VKBsim Gladiator EVO R    {0200231D-0000-0000-0000-504944564944}">
+   <option input="rotx" deadzone="0.098999992"/>
+   <option input="x" saturation="0.99000001"/>
+   <option input="x" saturation="0.99000001"/>
+  </deviceoptions>
+  <deviceoptions name="Controller (Gamepad)">
+   <option input="thumbr" deadzone="0.17979999"/>
+   <option input="thumbl" deadzone="0.6293"/>
+  </deviceoptions>
+  <deviceoptions name="Mouse">
+   <option input="@pause_OptionsMouseSmoothing" saturation="0"/>
+   <option input="@pause_OptionsMouseSmoothing" saturation="0"/>
+   <option input="@pause_OptionsMouseAcceleration" acceleration="0.018999999"/>
+  </deviceoptions>
+  <options type="keyboard" instance="1" Product="Keyboard  {6F1D2B61-D5A0-11CF-BFC7-444553540000}"/>
+  <options type="gamepad" instance="1" Product="Controller (Gamepad)">
+   <fps_move exponent="2"/>
+   <flight_move_pitch invert="0"/>
+   <flight_view exponent="1"/>
+   <flight_thrust_abs_half invert="0"/>
+   <flight_thrust_abs_full invert="1"/>
+  </options>
+  <options type="joystick" instance="1"/>
+  <options type="joystick" instance="2"/>
+  <options type="joystick" instance="3"/>
+  <options type="joystick" instance="4"/>
+  <options type="joystick" instance="5"/>
+  <options type="joystick" instance="6"/>
+  <options type="joystick" instance="7"/>
+  <options type="joystick" instance="8"/>
+  <modifiers />
+  <actionmap name="seat_general">
+   <action name="v_eject">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_emergency_exit">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_operator_mode_cycle_forward">
+    <rebind input="gp1_x"/>
+   </action>
+   <action name="v_toggle_mining_mode">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_toggle_salvage_mode">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_toggle_scan_mode">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="v_view_look_behind">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_thumbr"/>
+   </action>
+  </actionmap>
+  <actionmap name="spaceship_general">
+   <action name="v_flightready">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_self_destruct">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_toggle_all_portlocks">
+    <rebind input="kb1_ "/>
+   </action>
+  </actionmap>
+  <actionmap name="spaceship_view">
+   <action name="v_ads_toggle">
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="v_view_cycle_fwd">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="v_view_dynamic_zoom_abs_toggle">
+    <rebind input="gp1_thumbr"/>
+   </action>
+   <action name="v_view_freelook_mode">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_ " multiTap="2"/>
+   </action>
+   <action name="v_view_interact">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="v_view_pitch_absolute">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_view_pitch_mouse">
+    <rebind input="mo1_ "/>
+   </action>
+   <action name="v_view_yaw_absolute">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_view_yaw_mouse">
+    <rebind input="mo1_ "/>
+   </action>
+  </actionmap>
+  <actionmap name="spaceship_movement">
+   <action name="v_accel_range_decrement">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_accel_range_down">
+    <rebind input="kb1_down"/>
+   </action>
+   <action name="v_accel_range_increment">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_accel_range_up">
+    <rebind input="kb1_up"/>
+   </action>
+   <action name="v_afterburner">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_atc_loading_area_request">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_atc_request">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_shoulderl+dpad_down"/>
+   </action>
+   <action name="v_autoland">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_ifcs_speed_limiter_rel">
+    <rebind input="gp1_shoulderl+thumbry"/>
+   </action>
+   <action name="v_ifcs_speed_limiter_toggle">
+    <rebind input="gp1_shoulderl+dpad_right"/>
+   </action>
+   <action name="v_ifcs_throttle_swap_mode">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_dpad_up"/>
+   </action>
+   <action name="v_lock_rotation">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_master_mode_cycle_long">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_x"/>
+   </action>
+   <action name="v_pitch_mouse">
+    <rebind input="mo1_ "/>
+   </action>
+   <action name="v_roll">
+    <rebind input="gp1_thumblx"/>
+   </action>
+   <action name="v_roll_left">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_roll_right">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_space_brake">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_b"/>
+   </action>
+   <action name="v_strafe_back">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_strafe_down">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_strafe_forward">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_strafe_left">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_strafe_right">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_strafe_trim_reset_long">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_strafe_trim_reset_short">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_strafe_up">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_strafe_vertical">
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="v_toggle_jump_request">
+    <rebind input="mo1_ "/>
+   </action>
+   <action name="v_toggle_landing_system">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_toggle_yaw_roll_swap">
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="v_transform_cycle">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_yaw">
+    <rebind input="gp1_thumbrx"/>
+   </action>
+   <action name="v_yaw_mouse">
+    <rebind input="mo1_ "/>
+   </action>
+  </actionmap>
+  <actionmap name="spaceship_quantum">
+   <action name="v_toggle_qdrive_engagement">
+    <rebind input="gp1_shoulderl+triggerr_btn"/>
+   </action>
+  </actionmap>
+  <actionmap name="spaceship_targeting">
+   <action name="v_auto_targeting_toggle_long">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_look_ahead_enable">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_target_remove_all_pins">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_target_toggle_lock_index_1">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_target_toggle_lock_index_2">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_target_toggle_lock_index_3">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_target_toggle_pin_index_1">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_target_toggle_pin_index_2">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_target_toggle_pin_index_3">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_target_unlock">
+    <rebind input="kb1_ "/>
+   </action>
+  </actionmap>
+  <actionmap name="spaceship_targeting_advanced">
+   <action name="v_target_cycle_all_back">
+    <rebind input="kb1_left"/>
+   </action>
+   <action name="v_target_cycle_all_fwd">
+    <rebind input="kb1_right"/>
+   </action>
+   <action name="v_target_cycle_all_reset">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_target_cycle_attacker_fwd">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_target_cycle_attacker_reset">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_target_cycle_friendly_fwd">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_target_cycle_friendly_reset">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_target_cycle_hostile_fwd">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_target_cycle_hostile_reset">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_target_cycle_in_view_fwd">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_target_cycle_in_view_reset">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_target_cycle_subitem_fwd">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_target_cycle_subitem_reset">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_target_under_reticle">
+    <rebind input="gp1_a"/>
+   </action>
+  </actionmap>
+  <actionmap name="spaceship_radar">
+   <action name="v_invoke_ping">
+    <rebind input="gp1_shoulderl+a"/>
+   </action>
+  </actionmap>
+  <actionmap name="spaceship_scanning">
+   <action name="v_dec_scan_focus_level">
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="v_inc_scan_focus_level">
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="v_scanning_trigger_scan">
+    <rebind defaultInput="mouse1" input="kb1_ "/>
+    <rebind input="gp1_a"/>
+   </action>
+  </actionmap>
+  <actionmap name="spaceship_mining">
+   <action name="v_decrease_mining_throttle">
+    <rebind input="kb1_mwheel_down"/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="v_increase_mining_throttle">
+    <rebind input="kb1_mwheel_up"/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="v_jettison_volatile_cargo">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_mining_use_consumable1">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_mining_use_consumable2">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_mining_use_consumable3">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_toggle_mining_laser_fire">
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="v_toggle_mining_laser_type">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_y"/>
+   </action>
+  </actionmap>
+  <actionmap name="spaceship_salvage">
+   <action name="tractor_beam_vehicle_decrease_distance">
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="tractor_beam_vehicle_increase_distance">
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="v_salvage_focus_all_heads">
+    <rebind input="gp1_y"/>
+   </action>
+   <action name="v_salvage_focus_disintegrate">
+    <rebind input="gp1_b" activationMode="double_tap"/>
+   </action>
+   <action name="v_salvage_focus_fracture">
+    <rebind input="gp1_b"/>
+   </action>
+   <action name="v_salvage_focus_left">
+    <rebind defaultInput=" " input="kb1_1"/>
+   </action>
+   <action name="v_salvage_focus_right">
+    <rebind defaultInput=" " input="kb1_2"/>
+   </action>
+   <action name="v_salvage_toggle_fire_disintegrate">
+    <rebind defaultInput=" " input="kb1_lalt+s"/>
+   </action>
+   <action name="v_salvage_toggle_fire_focused">
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="v_salvage_toggle_fire_fracture">
+    <rebind defaultInput=" " input="kb1_ralt+w"/>
+   </action>
+   <action name="v_salvage_toggle_fire_right">
+    <rebind defaultInput=" " input="kb1_d"/>
+   </action>
+   <action name="v_salvage_toggle_gimbal_mode">
+    <rebind input="gp1_shoulderl+y"/>
+   </action>
+  </actionmap>
+  <actionmap name="turret_movement">
+   <action name="turret_remote_exit">
+    <rebind input="gp1_b"/>
+   </action>
+  </actionmap>
+  <actionmap name="spaceship_weapons">
+   <action name="v_weapon_preset_attack">
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="v_weapon_preset_next">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="v_weapon_preset_next_overflow">
+    <rebind input="gp1_y"/>
+   </action>
+   <action name="v_weapon_preset_prev">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_ "/>
+   </action>
+  </actionmap>
+  <actionmap name="spaceship_missiles">
+   <action name="v_weapon_cycle_missile_fwd">
+    <rebind input="gp1_y"/>
+   </action>
+   <action name="v_weapon_increase_max_missiles">
+    <rebind input="gp1_shoulderl+y"/>
+   </action>
+   <action name="v_weapon_toggle_launch_missile">
+    <rebind input="gp1_ "/>
+   </action>
+  </actionmap>
+  <actionmap name="spaceship_defensive">
+   <action name="v_weapon_countermeasure_decoy_burst_decrease">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_weapon_countermeasure_decoy_burst_increase">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_weapon_countermeasure_decoy_launch">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_dpad_left"/>
+   </action>
+   <action name="v_weapon_countermeasure_noise_launch">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_shoulderl+dpad_left"/>
+   </action>
+  </actionmap>
+  <actionmap name="spaceship_power">
+   <action name="v_engineering_assignment_engine_decrease">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_engineering_assignment_engine_increase">
+    <rebind input="kb1_6"/>
+   </action>
+   <action name="v_engineering_assignment_engine_max">
+    <rebind input="kb1_6"/>
+   </action>
+   <action name="v_engineering_assignment_engine_min">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_engineering_assignment_reset">
+    <rebind input="kb1_8"/>
+   </action>
+   <action name="v_engineering_assignment_shields_decrease">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_engineering_assignment_shields_increase">
+    <rebind input="kb1_5"/>
+   </action>
+   <action name="v_engineering_assignment_shields_max">
+    <rebind input="kb1_5"/>
+   </action>
+   <action name="v_engineering_assignment_shields_min">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_engineering_assignment_weapons_decrease">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_engineering_assignment_weapons_increase">
+    <rebind input="kb1_7"/>
+   </action>
+   <action name="v_engineering_assignment_weapons_max">
+    <rebind input="kb1_7"/>
+   </action>
+   <action name="v_engineering_assignment_weapons_min">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_power_throttle_down">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_power_throttle_max">
+    <rebind input="kb1_ " activationMode="press"/>
+    <rebind input="gp1_ " activationMode="press"/>
+   </action>
+   <action name="v_power_throttle_min">
+    <rebind input="kb1_ " activationMode="press"/>
+    <rebind input="gp1_ " activationMode="press"/>
+   </action>
+   <action name="v_power_throttle_up">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_power_toggle">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_shoulderl+x"/>
+   </action>
+   <action name="v_power_toggle_shields">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_power_toggle_thrusters">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_shoulderl+b"/>
+   </action>
+   <action name="v_power_toggle_weapons">
+    <rebind input="kb1_ "/>
+   </action>
+  </actionmap>
+  <actionmap name="spaceship_hud">
+   <action name="mobiglas">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_back"/>
+   </action>
+   <action name="v_hud_cancel">
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="v_hud_confirm">
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="v_hud_open_scoreboard">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_back"/>
+   </action>
+   <action name="v_starmap">
+    <rebind input="kb1_ "/>
+   </action>
+  </actionmap>
+  <actionmap name="lights_controller">
+   <action name="v_lights">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_shoulderl+dpad_up"/>
+   </action>
+  </actionmap>
+  <actionmap name="player">
+   <action name="ammoRepool">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="ar_mode_scroll_action_down">
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="ar_mode_scroll_action_up">
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="attackSecondary">
+    <rebind input="gp1_triggerl_btn"/>
+   </action>
+   <action name="cancelselect">
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="crouch">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="customize">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="drop">
+    <rebind input="gp1_shoulderl+dpad_down"/>
+   </action>
+   <action name="force_respawn">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="free_thirdperson_camera">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_shoulderl" multiTap="2"/>
+   </action>
+   <action name="hmd_rotatepitch">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="hmd_rotateroll">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="hmd_rotateyaw">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="holster">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="inspect">
+    <rebind input="gp1_shoulderl+a" activationMode="press"/>
+   </action>
+   <action name="interact_with_scope">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="jump">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="leanleft">
+    <rebind input="kb1_np_1"/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="leanright">
+    <rebind input="kb1_np_2"/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="ledgegrab">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="melee_dodgeBack">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="melee_dodgeLeft">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="melee_dodgeRight">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="mobiglas">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_back"/>
+   </action>
+   <action name="moveback">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="moveforward">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="moveleft">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="moveright">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="nextweapon">
+    <rebind input="gp1_y"/>
+   </action>
+   <action name="pan_thirdperson_down">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="pan_thirdperson_up">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="pl_hud_confirm">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="pl_hud_open_scoreboard">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_back"/>
+   </action>
+   <action name="port_modification_select">
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="prone">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="reload">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="reloadSecondary">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="selectUnarmedCombat">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_shoulderl+thumbr"/>
+   </action>
+   <action name="select_gadget_pit">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="select_meleeweapon_pit">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="select_primary_pit">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="select_secondary_pit">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="select_sidearm_pit">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="selectitem">
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="shop_camera_zoom_in">
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="shop_camera_zoom_out">
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="sprint">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="stabilize">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="takedown_nonLethal">
+    <rebind input="mo1_ "/>
+   </action>
+   <action name="thirdperson">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="throw_overhand">
+    <rebind input="gp1_triggerr_btn"/>
+   </action>
+   <action name="throw_underhand">
+    <rebind input="gp1_triggerl_btn"/>
+   </action>
+   <action name="toggleAttachHelmet">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="toggleEquipHelmet">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="toggle_cursor_input">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="toggle_flashlight">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_shoulderl+dpad_up"/>
+   </action>
+   <action name="toggle_lowered">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="use">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="v_starmap">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="visor_wipe">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="weapon_auxiliary_action">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_dpad_right"/>
+   </action>
+   <action name="weapon_change_firemode">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_shoulderl+dpad_right"/>
+   </action>
+   <action name="weapon_melee">
+    <rebind input="mo1_ "/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="weapon_zeroing_decrease">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="weapon_zeroing_increase">
+    <rebind input="kb1_ "/>
+   </action>
+  </actionmap>
+  <actionmap name="prone">
+   <action name="prone_rollleft">
+    <rebind input="kb1_ " activationMode="press"/>
+    <rebind input="gp1_ " activationMode="press"/>
+   </action>
+   <action name="prone_rollright">
+    <rebind input="kb1_ " activationMode="press"/>
+    <rebind input="gp1_ " activationMode="press"/>
+   </action>
+  </actionmap>
+  <actionmap name="tractor_beam">
+   <action name="tractor_beam_decrease_distance">
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="tractor_beam_increase_distance">
+    <rebind input="gp1_ "/>
+   </action>
+  </actionmap>
+  <actionmap name="zero_gravity_eva">
+   <action name="eva_boost">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="eva_brake">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="eva_roll_left">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="eva_roll_right">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="eva_strafe_back">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="eva_strafe_down">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_b"/>
+   </action>
+   <action name="eva_strafe_forward">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="eva_strafe_left">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="eva_strafe_right">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="eva_strafe_up">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_a"/>
+   </action>
+   <action name="eva_strafe_vertical">
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="eva_toggle_headlook_mode">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="eva_view_pitch_mouse">
+    <rebind input="mo1_ "/>
+   </action>
+   <action name="eva_view_yaw_mouse">
+    <rebind input="mo1_ "/>
+   </action>
+  </actionmap>
+  <actionmap name="zero_gravity_traversal">
+   <action name="zgt_detach">
+    <rebind input="gp1_b"/>
+   </action>
+   <action name="zgt_launch">
+    <rebind input="gp1_a"/>
+   </action>
+  </actionmap>
+  <actionmap name="vehicle_general">
+   <action name="mobiglas">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_back"/>
+   </action>
+   <action name="v_flightready">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="v_horn">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="v_starmap">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_back" multiTap="2"/>
+   </action>
+   <action name="v_toggle_all_portlocks">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_toggle_cursor_input">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_view_cycle_fwd">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="v_view_pitch_absolute">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_view_pitch_mouse">
+    <rebind input="mo1_ "/>
+   </action>
+   <action name="v_view_roll_absolute">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_view_yaw_absolute">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_view_yaw_mouse">
+    <rebind input="mo1_ "/>
+   </action>
+  </actionmap>
+  <actionmap name="vehicle_driver">
+   <action name="v_boost">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="v_brake">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_b"/>
+   </action>
+   <action name="v_move">
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="v_move_back">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_triggerl"/>
+   </action>
+   <action name="v_move_forward">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_triggerr"/>
+   </action>
+   <action name="v_yaw">
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="v_yaw_left">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_thumbl_left"/>
+   </action>
+   <action name="v_yaw_right">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_thumbl_right"/>
+   </action>
+  </actionmap>
+  <actionmap name="spectator">
+   <action name="spectate_freecam_sprint">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="spectate_gen_nextcamera">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="spectate_gen_nextmode">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="spectate_moveback">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="spectate_movedown">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="spectate_moveforward">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="spectate_moveleft">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="spectate_moveright">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="spectate_moveup">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="spectate_next_target">
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="spectate_prev_target">
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="spectate_rotatepitch">
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="spectate_rotatepitch_mouse">
+    <rebind input="mo1_ "/>
+   </action>
+   <action name="spectate_rotateyaw">
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="spectate_rotateyaw_mouse">
+    <rebind input="mo1_ "/>
+   </action>
+   <action name="spectate_toggle_freecam">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="spectate_toggle_hud">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="spectate_toggle_lock_target">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="spectate_zoom">
+    <rebind input="mo1_ "/>
+   </action>
+   <action name="spectate_zoom_in">
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="spectate_zoom_out">
+    <rebind input="gp1_ "/>
+   </action>
+  </actionmap>
+  <actionmap name="default">
+   <action name="focus_on_chat_textinput">
+    <rebind input="kb1_ "/>
+    <rebind defaultInput="np_enter" input="kb1_enter"/>
+   </action>
+   <action name="notification_accept">
+    <rebind input="gp1_x"/>
+   </action>
+   <action name="notification_decline">
+    <rebind input="gp1_b"/>
+   </action>
+   <action name="pl_exit">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_dpad_down"/>
+   </action>
+   <action name="toggle_chat">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_shoulderl+dpad_up" activationMode="double_tap"/>
+   </action>
+   <action name="toggle_contact">
+    <rebind input="kb1_ "/>
+   </action>
+  </actionmap>
+  <actionmap name="ui_notification">
+   <action name="ui_notification_accept">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="ui_notification_decline">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="ui_notification_ignore">
+    <rebind input="kb1_ "/>
+   </action>
+  </actionmap>
+  <actionmap name="player_emotes">
+   <action name="emote_cs_forward">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="emote_cs_left">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="emote_cs_no">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="emote_cs_right">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="emote_cs_stop">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="emote_cs_yes">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="emote_greet">
+    <rebind input="kb1_6"/>
+   </action>
+   <action name="emote_sit">
+    <rebind input="kb1_8"/>
+   </action>
+  </actionmap>
+  <actionmap name="player_input_optical_tracking">
+   <action name="foip_cyclechannel">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="foip_pushtotalk">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="foip_pushtotalk_proximity">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="foip_recalibrate">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="foip_viewownplayer">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="headtrack_enabled">
+    <rebind input="kb1_capslock"/>
+    <rebind input="gp1_shoulderl+thumbr"/>
+   </action>
+   <action name="headtrack_recenter_device">
+    <rebind input="gp1_shoulderl" activationMode="double_tap"/>
+   </action>
+  </actionmap>
+  <actionmap name="player_choice">
+   <action name="pc_camera_orbit">
+    <rebind input="mo1_ "/>
+    <rebind input="gp1_shoulderr"/>
+   </action>
+   <action name="pc_focus">
+    <rebind input="gp1_thumbr"/>
+   </action>
+   <action name="pc_interaction_mode">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="pc_interaction_select">
+    <rebind input="gp1_x"/>
+   </action>
+   <action name="pc_personal_back">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_dpad_down"/>
+   </action>
+   <action name="pc_personal_thought">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_shoulderl+shoulderr"/>
+   </action>
+   <action name="pc_pit_inventory">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="pc_pit_item_drop">
+    <rebind input="gp1_shoulderl+dpad_down"/>
+   </action>
+   <action name="pc_pit_looting">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="pc_pit_looting_toggle_view">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="pc_pit_looting_toggle_weapon_attachments">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="pc_pit_miningmode_actions">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="pc_qs_consumables">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="pc_qs_grenades">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_shoulderl+dpad_left"/>
+   </action>
+   <action name="pc_qs_weapons_pit_primary">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="pc_qs_weapons_pit_secondary">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="pc_qs_weapons_pit_sidearm">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="pc_screen_focus_down">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="pc_screen_focus_left">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="pc_screen_focus_right">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="pc_screen_focus_up">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="pc_zoom_in">
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="pc_zoom_out">
+    <rebind input="gp1_ "/>
+   </action>
+  </actionmap>
+  <actionmap name="view_director_mode">
+   <action name="view_enable_camview_mode">
+    <rebind input="kb1_ "/>
+    <rebind input="gp1_ "/>
+   </action>
+   <action name="view_fov_in">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="view_fov_out">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="view_fstop_in">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="view_fstop_out">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="view_load_view_1">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="view_load_view_2">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="view_load_view_3">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="view_load_view_4">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="view_load_view_5">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="view_load_view_6">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="view_load_view_7">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="view_load_view_8">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="view_load_view_9">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="view_move_target_X_neg">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="view_move_target_X_pos">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="view_move_target_Y_neg">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="view_move_target_Y_pos">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="view_move_target_Z_neg">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="view_move_target_Z_pos">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="view_reset_saved">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="view_restore_defaults">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="view_save_view_1">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="view_save_view_2">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="view_save_view_3">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="view_save_view_4">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="view_save_view_5">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="view_save_view_6">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="view_save_view_7">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="view_save_view_8">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="view_save_view_9">
+    <rebind input="kb1_ "/>
+   </action>
+   <action name="view_switch_to_alternative">
+    <rebind input="kb1_ "/>
+   </action>
+  </actionmap>
+ </ActionProfiles>
+</ActionMaps>
