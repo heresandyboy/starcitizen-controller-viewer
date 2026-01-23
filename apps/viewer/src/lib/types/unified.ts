@@ -97,6 +97,8 @@ export interface DirectGamepadBinding {
   modifier?: string;
   /** Activation mode (e.g., "hold", "toggle", "double_tap") */
   activationMode?: string;
+  /** Number of taps required (2 = double tap, 3 = triple tap, etc.) */
+  multiTap?: number;
   /** Whether this is the SC default binding */
   isDefault?: boolean;
 }

@@ -217,9 +217,30 @@ function formatGamepadBinding(binding: DirectGamepadBinding): string {
   if (binding.modifier) {
     result = `${binding.modifier} + ${result}`;
   }
-  if (binding.activationMode && binding.activationMode !== 'press') {
-    result += ` (${binding.activationMode})`;
+
+  // Build activation info
+  const activationParts: string[] = [];
+
+  // Show multiTap with distinct indicator (×2, ×3, etc.)
+  if (binding.multiTap && binding.multiTap >= 2) {
+    activationParts.push(`×${binding.multiTap}`);
   }
+
+  // Show activationMode if not default 'press'
+  if (binding.activationMode && binding.activationMode !== 'press') {
+    // Format activation mode for display
+    const modeDisplay = binding.activationMode
+      .replace(/_/g, ' ')
+      .replace('delayed ', '⏱')
+      .replace('double tap', '2×tap')
+      .replace('nonblocking', '');
+    activationParts.push(modeDisplay.trim());
+  }
+
+  if (activationParts.length > 0) {
+    result += ` (${activationParts.join(', ')})`;
+  }
+
   return result;
 }
 

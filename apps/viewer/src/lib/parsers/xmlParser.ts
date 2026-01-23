@@ -375,6 +375,7 @@ function toGamepadBinding(binding: ParsedXmlBinding): DirectGamepadBinding {
     input: binding.inputKey,
     modifier: binding.modifiers.length > 0 ? binding.modifiers[0] : undefined,
     activationMode: binding.activationMode,
+    multiTap: binding.multiTap,
   };
 }
 
