@@ -2,6 +2,7 @@
 export { GameActionCard } from './GameActionCard';
 export { GameActionBrowser } from './GameActionBrowser';
 export { GameActionUploader } from './GameActionUploader';
+export { DefaultActionBrowser } from './DefaultActionBrowser';
 
 // Legacy components (reWASD-centric)
 export { ConfigUploader } from './ConfigUploader';
