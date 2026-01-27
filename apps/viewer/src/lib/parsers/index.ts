@@ -43,3 +43,19 @@ export {
   type ResolveResult,
   type ResolveStats,
 } from './chainResolver';
+
+// Star Citizen defaultProfile.xml parser (game defaults)
+export {
+  parseDefaultProfile,
+  fetchAndParseDefaultProfile,
+  filterActionsByMap,
+  getDefaultActionMapNames,
+  buildActionLookup,
+} from './defaultProfileParser';
+
+// Star Citizen global.ini localization parser
+export {
+  parseGlobalIni,
+  resolveLocalizationKey,
+  fetchAndParseGlobalIni,
+} from './globalIniParser';
