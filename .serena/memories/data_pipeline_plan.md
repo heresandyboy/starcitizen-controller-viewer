@@ -1,130 +1,56 @@
-# Data Pipeline Plan - Independent SC Action Generation System
+# Data Pipeline Plan — Independent SC Action Generation System
 
-## User's Vision (CRITICAL CONTEXT)
+## Current State (as of 2026-01-27)
 
-The user wants a FULLY INDEPENDENT system - NOT dependent on StarBinder. StarBinder is reference only.
+### Completed
+- **Data.p4k extraction** (controller-5qf, closed): `scripts/extract-sc-data.py` extracts `defaultProfile.xml` + `global.ini` from SC's Data.p4k archive. Works correctly.
+- **SC 4.5 data extracted**: Files in `apps/viewer/public/configs/sc-4.5/`
+- **Parser logic** (controller-92t, closed): Parsing logic is correct and tested, BUT was implemented as a runtime browser parser instead of a build-time generator. See `controller_92t_parser_task` memory for details.
+- **Types**: `SCDefaultAction` type in `apps/viewer/src/lib/types/defaultProfile.ts` is correct (17 fields matching StarBinder format)
+- **Tests**: 29 tests validating parser output against StarBinder's MappedActions.js reference
 
-### End-to-End Pipeline
-1. **Import Data.p4k** → Extract defaultProfile.xml (per SC version)
-2. **Generate MappedActions.ts** → TypeScript typed version of all ~653 actions with defaults
-3. **Version-specific defaults** → Drop-down to view defaults per SC patch
-4. **Import custom XML** → User's actionmaps.xml overlaid on defaults
-5. **Compare configs** → Diff default vs custom, or custom vs custom
-6. **ReWASD overlay** → See controller mappings on top of SC bindings, clearly marked
+### Next Up — controller-c3k (P1, OPEN)
+**Build the actual generator script.** This is the critical missing piece.
+See controller-c3k beads issue for the full implementation spec. Summary:
+1. Rewrite `defaultProfileParser.ts` to use `fast-xml-parser` instead of browser `DOMParser`
+2. Remove browser `fetchAndParse*()` wrappers
+3. Create `scripts/generate-actions.ts` (Node script, takes `--version` arg)
+4. Output static TypeScript files to `apps/viewer/src/lib/data/sc-{version}/`:
+   - `defaultActions.ts` — `SCDefaultAction[]` (711 actions for SC 4.5)
+   - `localization.ts` — `Record<string, string>` (~1125 ui_C keys)
+5. Add `"generate:actions"` npm script
+6. Update tests
 
-### Key Technical Findings
+### Future Phases (lower priority, separate issues)
+- **controller-ke0** (P2): Config management UI with version selector
+- **controller-iw1** (P2): Config comparison view (default vs custom, version vs version)
+- **controller-nld** (P2): ReWASD overlay on SC action view
+- **controller-xod** (P2): Show all actions including unbound (blocked by c3k)
+- **controller-p6q** (P2): Keyword-based filtering (blocked by c3k)
 
-#### Data.p4k Extraction
-- Data.p4k is 80-100GB modified ZIP archive (CryEngine)
-- **Cannot do browser-side extraction** - too large, needs decryption
-- Tools: unp4k (C#), scdatatools (Python), HAL Extractor (Windows Store)
-- Can extract single files without processing whole archive
-- Files may be in XMLB (binary XML) format - need unforge.exe to decode
-- **Recommended approach**: CLI tool / script the user runs locally, outputs plain XML
-- Files needed from Data.p4k:
-  - `Data/Libs/Config/defaultProfile.xml` - action definitions
-  - `Data/Localization/english/global.ini` - human-readable labels
+## End-to-End Pipeline (Target Architecture)
 
-#### defaultProfile.xml Structure (from StarBinder analysis)
-Each `<actionmap>` contains `<action>` elements with:
-- `name` - action name (e.g., "v_emergency_exit")
-- `UILabel` - localization key (e.g., "@ui_CIEmergencyExit")
-- `UIDescription` - description localization key
-- `Category` - functional category
-- `keyboard`, `mouse`, `gamepad`, `joystick` - default binding attributes
-- `activationMode` - how binding triggers
-- `optionGroup` - for relative axes (curves/invert)
-
-The `<actionmap>` itself has:
-- `name` - map name (e.g., "seat_general")
-- `UILabel` - UI category key (e.g., "@ui_CCSeatGeneral")
-
-#### MappedActions.ts Generation
-Transform defaultProfile.xml into TypeScript with these fields per action:
-```typescript
-interface SCDefaultAction {
-  actionName: string;        // "v_emergency_exit"
-  mapName: string;           // "seat_general"  
-  keyboardBind: string|null; // "u+lshift"
-  mouseBind: string|null;
-  gamepadBind: string|null;
-  joystickBind: string|null;
-  keyboardBindable: boolean;
-  mouseBindable: boolean;
-  gamepadBindable: boolean;
-  joystickBindable: boolean;
-  activationMode: string;    // "tap", "press", "hold", etc.
-  category: string|null;     // "ShipSystems", "PlayerActions", etc.
-  uiCategory: string;        // "@ui_CCSpaceFlight"
-  label: string;             // "@ui_CIEmergencyExit" (or resolved)
-  description: string;       // "@ui_CIEmergencyExitDesc"
-  optionGroup: string|null;
-  version: string;           // SC version
-}
+```
+1. New SC version released
+2. Run: python scripts/extract-sc-data.py "C:\...\LIVE" -v 4.6
+   → Extracts defaultProfile.xml + global.ini to public/configs/sc-4.6/
+3. Run: npm run generate:actions -- --version 4.6
+   → Generates src/lib/data/sc-4.6/defaultActions.ts + localization.ts
+4. App imports static TypeScript — zero runtime parsing
+5. User can switch SC versions via dropdown (controller-ke0)
+6. User can import custom actionmaps.xml overlaid on defaults
+7. User can compare configs (controller-iw1)
+8. ReWASD overlay shows controller→key→action chain (controller-nld)
 ```
 
-### Proposed Architecture
-
-#### New Files/Modules
-1. `apps/viewer/src/lib/data/` - Data layer
-   - `scDefaultActions.ts` - Generated TypeScript (like MappedActions.js)
-   - `scActionMetadata.ts` - Labels, descriptions, keywords  
-   - `scLocalization.ts` - i18n data
-   - `types.ts` - TypeScript interfaces
-
-2. `apps/viewer/src/lib/parsers/`
-   - `defaultProfileParser.ts` - Parse defaultProfile.xml → SCDefaultAction[]
-   - `globalIniParser.ts` - Parse global.ini → localization map
-   - `configMerger.ts` - Merge user XML overrides onto defaults
-
-3. `apps/viewer/src/components/`
-   - `DefaultProfileImporter.tsx` - UI for importing defaultProfile.xml
-   - `VersionSelector.tsx` - Drop-down for SC version defaults
-   - `ConfigComparer.tsx` - Side-by-side comparison
-   - Enhanced `ConfigUploader.tsx` - Multiple config support
-
-4. `tools/` or `scripts/`
-   - `extract-default-profile.py` - Python script using scdatatools
-   - `generate-actions.ts` - Node script to generate TypeScript from XML
-   - Instructions for using unp4k manually
-
-### Implementation Phases
-
-#### Phase 1: defaultProfile.xml Parser
-- Create `defaultProfileParser.ts` to parse the full XML
-- Generate typed action list with all metadata
-- Store as versioned JSON in `public/configs/sc-{version}/`
-
-#### Phase 2: Localization & Labels
-- Parse global.ini for @ui_ key resolution
-- Create human-readable label/description system
-- Fall back to auto-formatting for unknown keys
-
-#### Phase 3: Config Management UI
-- Version selector dropdown
-- Import defaultProfile.xml (extracted by user)
-- Import custom XML files
-- Switch between configs
-
-#### Phase 4: Config Comparison
-- Default vs custom diff
-- Custom vs custom diff
-- Highlight changed/added/removed bindings
-
-#### Phase 5: ReWASD Integration
-- Overlay reWASD mappings on SC bindings
-- Show controller button → keyboard key → SC action chain
-- Mark reWASD actions distinctly from native bindings
-- Support macro visualization
-
-### Existing Beads Tasks
-- controller-n3b (P1): Import keybinds.json as scActionMetadata.ts
-- controller-c3k (P1): Import MappedActions.js as scDefaultBindings.ts  
-- controller-p6q (P2): Implement keyword-based filtering (blocked by n3b)
-- controller-xod (P2): Show all actions including unbound (blocked by c3k)
-- controller-jqz (P3): Extract defaultProfile.xml documentation
-
-### NEEDS UPDATE: These beads need to be revised to reflect the independent pipeline approach
-- controller-n3b → Should be "Create scActionMetadata.ts from defaultProfile.xml" not "import from StarBinder"
-- controller-c3k → Should be "Build defaultProfile parser to generate typed actions" not "import MappedActions.js"
-- Need new tasks for: extraction script, config management UI, version selector, comparison
+## Key Files
+| File | Purpose | Status |
+|------|---------|--------|
+| `scripts/extract-sc-data.py` | Extract from Data.p4k | Done |
+| `scripts/generate-actions.ts` | Generate static TS from XML+INI | **TODO (controller-c3k)** |
+| `apps/viewer/src/lib/parsers/defaultProfileParser.ts` | XML parsing logic | Needs rewrite (DOMParser→fast-xml-parser) |
+| `apps/viewer/src/lib/parsers/globalIniParser.ts` | INI parsing logic | Done (works in Node) |
+| `apps/viewer/src/lib/types/defaultProfile.ts` | SCDefaultAction type | Done |
+| `apps/viewer/src/lib/data/sc-{version}/defaultActions.ts` | Generated action data | **TODO** |
+| `apps/viewer/src/lib/data/sc-{version}/localization.ts` | Generated i18n data | **TODO** |
+| `apps/starbinder-reference/MappedActions.js` | Reference (711 actions) | Reference only |
