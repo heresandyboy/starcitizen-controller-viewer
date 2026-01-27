@@ -1,144 +1,126 @@
 /**
  * Parser for Star Citizen defaultProfile.xml
  *
- * Extracts all action definitions with their default bindings and metadata.
- * Produces an SCDefaultAction[] matching StarBinder's MappedActions.js format.
- *
- * Key difference from xmlParser.ts: this parses the GAME DEFAULTS (attributes
- * on <action> elements), not user overrides (<rebind> child elements).
+ * Extracts all actionmap actions with their bindings, metadata, and categories.
+ * Uses fast-xml-parser for Node.js compatibility (build-time generation).
  */
 
-import type { SCDefaultAction, SCActivationMode } from '../types/defaultProfile';
+import { XMLParser } from 'fast-xml-parser'
+import type { SCDefaultAction, SCActivationMode } from '../types/defaultProfile'
 
-/** Action maps excluded from output (matches StarBinder's excludedCategories) */
-const EXCLUDED_MAPS = new Set(['debug']);
+/** Action maps excluded from output (debug/internal) */
+const EXCLUDED_MAPS = new Set(['debug'])
 
-/**
- * Returns the bind value for a device attribute.
- * - Missing attribute → null (not bindable)
- * - Space " " or empty "" → null (bindable but unbound)
- * - Any other value → the bind string
- */
-function cleanBindValue(value: string | null): string | null {
-  if (value === null) return null;
-  if (value.trim() === '') return null;
-  return value;
+const ATTR = '@_'
+
+/** Ensure a value is always an array */
+function toArray<T>(val: T | T[] | undefined): T[] {
+  if (val === undefined) return []
+  return Array.isArray(val) ? val : [val]
+}
+
+/** Normalize bind values: null/empty/whitespace-only → null */
+function cleanBindValue(value: string | number | undefined): string | null {
+  if (value === undefined || value === null) return null
+  const str = String(value)
+  if (str.trim() === '') return null
+  return str
+}
+
+/** Read an attribute from a parsed element (attributes are prefixed with @_) */
+function attr(el: Record<string, unknown>, name: string): string | undefined {
+  const val = el[`${ATTR}${name}`]
+  if (val === undefined || val === null) return undefined
+  return String(val)
 }
 
 /**
- * Parse defaultProfile.xml content into an array of SCDefaultAction objects.
- *
- * Uses browser DOMParser. Each <actionmap> contains <action> elements whose
- * attributes define the default bindings and metadata.
- *
- * Filtering rules (matching StarBinder's loadAndParseDataminedXML):
- * - Skip duplicate actionNames (first occurrence wins)
- * - Skip actionmaps in the excluded list (e.g. "debug")
- * - Skip actions with names starting with "flashui"
- * - Skip actions that have no UILabel, UIDescription, or Category
+ * Parse defaultProfile.xml content into SCDefaultAction[].
+ * Deduplicates by action name, skips debug/flashui/no-metadata actions.
  */
 export function parseDefaultProfile(xmlString: string): SCDefaultAction[] {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(xmlString, 'text/xml');
+  const parser = new XMLParser({
+    ignoreAttributes: false,
+    attributeNamePrefix: ATTR,
+    trimValues: false,
+    isArray: (name) => name === 'actionmap' || name === 'action',
+  })
 
-  const parseError = doc.querySelector('parsererror');
-  if (parseError) {
-    throw new Error(`XML parse error: ${parseError.textContent}`);
+  const parsed = parser.parse(xmlString)
+  const profile = parsed.profile ?? parsed
+  const actionMaps = toArray(profile?.actionmap)
+
+  if (actionMaps.length === 0) {
+    throw new Error('XML parse error: no actionmap elements found')
   }
 
-  const actions: SCDefaultAction[] = [];
-  const seenNames = new Set<string>();
-  const actionMaps = doc.querySelectorAll('actionmap');
+  const actions: SCDefaultAction[] = []
+  const seenNames = new Set<string>()
 
   for (const map of actionMaps) {
-    const mapName = map.getAttribute('name') ?? '';
-    if (EXCLUDED_MAPS.has(mapName)) continue;
+    const mapName = attr(map, 'name') ?? ''
+    if (EXCLUDED_MAPS.has(mapName)) continue
 
-    const version = map.getAttribute('version') || null;
-    const uiCategory = map.getAttribute('UICategory') || null;
+    const version = attr(map, 'version') ?? null
+    const uiCategory = attr(map, 'UICategory') ?? null
 
-    const actionElements = map.querySelectorAll('action');
+    for (const action of toArray(map.action)) {
+      const actionName = attr(action, 'name')
+      if (!actionName) continue
+      if (seenNames.has(actionName)) continue
+      if (actionName.startsWith('flashui')) continue
 
-    for (const action of actionElements) {
-      const actionName = action.getAttribute('name');
-      if (!actionName) continue;
-      if (seenNames.has(actionName)) continue;
-      if (actionName.startsWith('flashui')) continue;
-
-      const label = action.getAttribute('UILabel') || null;
-      const description = action.getAttribute('UIDescription') || null;
-      const category = action.getAttribute('Category') || null;
+      const label = attr(action, 'UILabel') ?? null
+      const description = attr(action, 'UIDescription') ?? null
+      const category = attr(action, 'Category') ?? null
 
       // Skip actions with no metadata (no label, description, or category)
-      if (!label && !description && !category) continue;
+      if (!label && !description && !category) continue
 
-      seenNames.add(actionName);
+      seenNames.add(actionName)
 
-      const keyboardRaw = action.getAttribute('keyboard');
-      const mouseRaw = action.getAttribute('mouse');
-      const gamepadRaw = action.getAttribute('gamepad');
-      const joystickRaw = action.getAttribute('joystick');
-
-      const activationModeRaw = action.getAttribute('activationMode');
+      const activationModeRaw = attr(action, 'activationMode') as SCActivationMode | undefined
 
       actions.push({
         actionName,
         mapName,
-        keyboardBind: cleanBindValue(keyboardRaw),
-        mouseBind: cleanBindValue(mouseRaw),
-        gamepadBind: cleanBindValue(gamepadRaw),
-        joystickBind: cleanBindValue(joystickRaw),
-        keyboardBindable: !!action.getAttribute('keyboard'),
-        mouseBindable: !!action.getAttribute('mouse'),
-        gamepadBindable: !!action.getAttribute('gamepad'),
-        joystickBindable: !!action.getAttribute('joystick'),
-        activationMode: (activationModeRaw as SCActivationMode) ?? null,
+        keyboardBind: cleanBindValue(attr(action, 'keyboard')),
+        mouseBind: cleanBindValue(attr(action, 'mouse')),
+        gamepadBind: cleanBindValue(attr(action, 'gamepad')),
+        joystickBind: cleanBindValue(attr(action, 'joystick')),
+        keyboardBindable: !!attr(action, 'keyboard'),
+        mouseBindable: !!attr(action, 'mouse'),
+        gamepadBindable: !!attr(action, 'gamepad'),
+        joystickBindable: !!attr(action, 'joystick'),
+        activationMode: activationModeRaw ?? null,
         category: category ?? null,
         UICategory: uiCategory,
         label: label?.trim() ?? '',
         description: description?.trim() || null,
         version,
-        optionGroup: action.getAttribute('optionGroup') ?? null,
-      });
+        optionGroup: attr(action, 'optionGroup') ?? null,
+      })
     }
   }
 
-  return actions;
+  return actions
 }
 
-/**
- * Fetch and parse a defaultProfile.xml file from a URL (e.g. public/configs/).
- */
-export async function fetchAndParseDefaultProfile(url: string): Promise<SCDefaultAction[]> {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch defaultProfile.xml: ${response.status} ${response.statusText}`);
-  }
-  const xmlString = await response.text();
-  return parseDefaultProfile(xmlString);
-}
-
-/**
- * Look up actions by map name.
- */
+/** Filter actions belonging to a specific action map */
 export function filterActionsByMap(actions: SCDefaultAction[], mapName: string): SCDefaultAction[] {
-  return actions.filter((a) => a.mapName === mapName);
+  return actions.filter((a) => a.mapName === mapName)
 }
 
-/**
- * Get unique action map names from parsed actions.
- */
+/** Get unique action map names from parsed actions */
 export function getDefaultActionMapNames(actions: SCDefaultAction[]): string[] {
-  return [...new Set(actions.map((a) => a.mapName))];
+  return [...new Set(actions.map((a) => a.mapName))]
 }
 
-/**
- * Build a lookup from actionName → SCDefaultAction.
- */
+/** Build a lookup map from actionName → SCDefaultAction */
 export function buildActionLookup(actions: SCDefaultAction[]): Map<string, SCDefaultAction> {
-  const lookup = new Map<string, SCDefaultAction>();
+  const lookup = new Map<string, SCDefaultAction>()
   for (const action of actions) {
-    lookup.set(action.actionName, action);
+    lookup.set(action.actionName, action)
   }
-  return lookup;
+  return lookup
 }

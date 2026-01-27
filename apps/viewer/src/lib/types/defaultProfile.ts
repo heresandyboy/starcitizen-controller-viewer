@@ -5,24 +5,30 @@
 
 /** All known activation modes from defaultProfile.xml ActivationModes section */
 export type SCActivationMode =
-  | 'tap'
-  | 'press'
-  | 'hold'
-  | 'double_tap'
+  | 'all'
+  | 'always'
+  | 'analog'
   | 'delayed_hold'
+  | 'delayed_hold_long'
   | 'delayed_hold_no_retrigger'
   | 'delayed_press'
-  | 'delayed_press_medium'
   | 'delayed_press_long'
-  | 'delayed_press_medium_no_retrigger'
   | 'delayed_press_long_no_retrigger'
-  | 'release'
-  | 'always'
-  | 'toggle_on_press'
-  | 'toggle_on_release'
-  | 'tap_hold'
+  | 'delayed_press_medium'
+  | 'delayed_press_medium_no_retrigger'
+  | 'double_tap'
   | 'double_tap_hold'
-  | 'analog';
+  | 'double_tap_nonblocking'
+  | 'hold'
+  | 'hold_no_retrigger'
+  | 'hold_toggle'
+  | 'press'
+  | 'release'
+  | 'smart_toggle'
+  | 'tap'
+  | 'tap_hold'
+  | 'toggle_on_press'
+  | 'toggle_on_release';
 
 /**
  * A single parsed action from defaultProfile.xml.

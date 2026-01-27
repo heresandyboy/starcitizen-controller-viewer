@@ -47,7 +47,6 @@ export {
 // Star Citizen defaultProfile.xml parser (game defaults)
 export {
   parseDefaultProfile,
-  fetchAndParseDefaultProfile,
   filterActionsByMap,
   getDefaultActionMapNames,
   buildActionLookup,
@@ -57,5 +56,4 @@ export {
 export {
   parseGlobalIni,
   resolveLocalizationKey,
-  fetchAndParseGlobalIni,
 } from './globalIniParser';

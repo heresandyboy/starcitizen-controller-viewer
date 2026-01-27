@@ -64,14 +64,3 @@ export function resolveLocalizationKey(key: string, locMap: SCLocalizationMap): 
   return locMap.get(lookupKey) ?? key;
 }
 
-/**
- * Fetch and parse a global.ini file from a URL.
- */
-export async function fetchAndParseGlobalIni(url: string): Promise<SCLocalizationMap> {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch global.ini: ${response.status} ${response.statusText}`);
-  }
-  const text = await response.text();
-  return parseGlobalIni(text);
-}

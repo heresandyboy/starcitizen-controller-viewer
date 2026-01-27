@@ -14,7 +14,8 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "beads:update": "go install github.com/steveyegge/beads/cmd/bd@latest",
-    "beads:hooks:install": "bd hooks install"
+    "beads:hooks:install": "bd hooks install",
+    "generate:actions": "npx tsx scripts/generate-actions.ts"
   },
   "dependencies": {
     "fast-xml-parser": "^5.3.3",
