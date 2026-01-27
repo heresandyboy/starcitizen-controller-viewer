@@ -1,6 +1,6 @@
 # Data Pipeline & App Roadmap
 
-## Status: Core pipeline COMPLETE, Phase 1 UI next (as of 2026-01-27)
+## Status: Phase 1 foundation COMPLETE (controller-xod done), UI features next (as of 2026-01-27)
 
 ### Completed (Data Pipeline)
 - **Data.p4k extraction**: `scripts/extract-sc-data.py`
@@ -20,7 +20,7 @@
 ### Phase 1: Default Bindings Viewer (NEXT)
 | Issue | Description | Depends On |
 |-------|-------------|------------|
-| **controller-xod** (P1) | Foundation: Load & display all defaults on app start | ✅ Done |
+| ✅ **controller-xod** (P1) | Foundation: Load & display all defaults on app start | ✅ Done |
 | **controller-ucr** (P1) | Input type selector (KB/Mouse, Gamepad, Joystick) | xod |
 | **controller-cc2** (P1) | Action map / game mode filter | xod |
 | **controller-6kj** (P1) | Bound/unbound toggle (tri-state) | xod |
