@@ -32,3 +32,6 @@ yarn-error.log*
 # TypeScript
 *.tsbuildinfo
 .playwright-mcp/
+
+# Claude
+nul
