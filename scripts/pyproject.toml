@@ -1,0 +1,14 @@
+[project]
+name = "sc-data-extractor"
+version = "0.1.0"
+description = "Extract Star Citizen default profile and localization data from Data.p4k"
+requires-python = ">=3.10"
+dependencies = [
+    "pycryptodome>=3.20.0",
+    "zstandard>=0.22.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]

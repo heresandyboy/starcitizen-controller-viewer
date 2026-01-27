@@ -33,5 +33,17 @@ yarn-error.log*
 *.tsbuildinfo
 .playwright-mcp/
 
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+.venv/
+
+# Large SC data files (local extraction inputs, not committed)
+**/global.ini
+
+# Reference repos (cloned for development, not part of project)
+apps/scdatatools/
+
 # Claude
 nul
