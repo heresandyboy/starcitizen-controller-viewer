@@ -1,23 +1,27 @@
 # Data Pipeline & App Roadmap
 
-## Status: Phase 1 foundation COMPLETE (controller-xod done), UI features next (as of 2026-01-27)
+## Status: Phase 1 foundation COMPLETE, UI/UX Design phase started (as of 2026-01-27)
 
-### Completed (Data Pipeline)
-- **Data.p4k extraction**: `scripts/extract-sc-data.py`
-- **Parser**: `defaultProfileParser.ts` uses `fast-xml-parser` (Node-compatible)
-- **Generator**: `apps/viewer/scripts/generate-actions.ts`
-- **SC 4.5 generated data**: `defaultActions.ts` (711 actions, 39 actionmaps) + `localization.ts` (1227 keys)
-- **Types**: `SCDefaultAction` in `apps/viewer/src/lib/types/defaultProfile.ts`
-- **Tests**: All passing, build clean
+### UI/UX Design Epic (controller-a1z) — NEW, DO FIRST
+| Issue | Description | Depends On |
+|-------|-------------|------------|
+| **controller-1fx** (P1) | Design: UX Principles & Design System | Epic |
+| **controller-fbv** (P1) | Design: Unified Filter Bar Component | 1fx |
+| **controller-00e** (P1) | Design: Enhanced Table View | fbv |
+| **controller-e8r** (P2) | Design: Card View | fbv |
+| **controller-q0b** (P2) | Design: Controller Visual View | fbv |
+| **controller-dwp** (P2) | Design: Comparison View | fbv, ke0 |
+| **controller-cf0** (P1) | Implement: Design System (Tailwind + CSS) | 1fx |
+| **controller-26h** (P1) | Implement: Unified Filter Bar | fbv, cf0 |
+| **controller-hok** (P1) | Implement: Enhanced Table View | 00e, 26h |
+| **controller-wdn** (P2) | Implement: Card View | e8r, 26h |
+| **controller-0q2** (P2) | Implement: Controller Visual View | q0b, 26h |
+| **controller-3xe** (P2) | Implement: Comparison View | dwp, 26h, ke0 |
 
-### Workflow for New SC Versions
-```
-1. python scripts/extract-sc-data.py "C:\...\StarCitizen\LIVE" -v 4.6
-2. cd apps/viewer && npm run generate:actions -- --version 4.6
-3. App imports static TypeScript — zero runtime parsing
-```
+**NOTE**: Phase 1 filter features (controller-ucr, cc2, 6kj, cms) are absorbed into the unified filter bar.
+See Serena memories: `ux_design_strategy`, `binding_data_complexity` for full design context.
 
-### Phase 1: Default Bindings Viewer (NEXT)
+### Phase 1: Default Bindings Viewer (original, mostly absorbed into UI/UX epic)
 | Issue | Description | Depends On |
 |-------|-------------|------------|
 | ✅ **controller-xod** (P1) | Foundation: Load & display all defaults on app start | ✅ Done |

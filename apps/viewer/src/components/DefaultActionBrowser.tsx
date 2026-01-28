@@ -1,9 +1,18 @@
 'use client';
 
-import { useState, useMemo, useCallback, useRef } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import type { SCDefaultAction } from '@/lib/types/defaultProfile';
+import type { InputType } from '@/lib/types/filters';
 import { defaultActions, SC_VERSION } from '@/lib/data/sc-4.5/defaultActions';
 import { localization } from '@/lib/data/sc-4.5/localization';
+import { useFilterState } from '@/lib/hooks/useFilterState';
+import { filterActions, groupActionsByMap, getUniqueActionMaps } from '@/lib/filters/filterActions';
+import { FilterBar } from './FilterBar';
+import { CardView } from './CardView';
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
 
 function resolveLabel(key: string | null): string {
   if (!key) return '';
@@ -24,59 +33,95 @@ function formatBind(bind: string): string {
     .join(' + ');
 }
 
-type GroupedActions = Record<string, SCDefaultAction[]>;
+// ---------------------------------------------------------------------------
+// Sort
+// ---------------------------------------------------------------------------
+
+type SortColumn = 'label' | 'keyboard' | 'mouse' | 'gamepad' | 'joystick';
+type SortDirection = 'asc' | 'desc';
+type SortState = { column: SortColumn; direction: SortDirection } | null;
+
+function getBind(action: SCDefaultAction, col: SortColumn): string | null {
+  switch (col) {
+    case 'label': return resolveLabel(action.label);
+    case 'keyboard': return action.keyboardBind;
+    case 'mouse': return action.mouseBind;
+    case 'gamepad': return action.gamepadBind;
+    case 'joystick': return action.joystickBind;
+  }
+}
+
+function sortActions(actions: SCDefaultAction[], sort: SortState): SCDefaultAction[] {
+  if (!sort) return actions;
+  const { column, direction } = sort;
+  const mult = direction === 'asc' ? 1 : -1;
+
+  return [...actions].sort((a, b) => {
+    const aVal = getBind(a, column) ?? '';
+    const bVal = getBind(b, column) ?? '';
+    // Empty bindings sink to bottom regardless of direction
+    if (!aVal && bVal) return 1;
+    if (aVal && !bVal) return -1;
+    return mult * aVal.localeCompare(bVal);
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Bind badge color
+// ---------------------------------------------------------------------------
+
+const BIND_COLORS: Record<string, string> = {
+  kbd: 'bg-kbd-subtle text-kbd',
+  mouse: 'bg-mouse-subtle text-mouse',
+  gamepad: 'bg-gamepad-subtle text-gamepad',
+  joystick: 'bg-joystick-subtle text-joystick',
+};
+
+// ---------------------------------------------------------------------------
+// Sort header icon
+// ---------------------------------------------------------------------------
+
+function SortIcon({ active, direction }: { active: boolean; direction: SortDirection | null }) {
+  if (!active || !direction) {
+    return (
+      <svg className="w-3 h-3 opacity-30" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M8 3l4 5H4l4-5zm0 10l-4-5h8l-4 5z" />
+      </svg>
+    );
+  }
+  return direction === 'asc' ? (
+    <svg className="w-3 h-3" viewBox="0 0 16 16" fill="currentColor">
+      <path d="M8 3l5 6H3l5-6z" />
+    </svg>
+  ) : (
+    <svg className="w-3 h-3" viewBox="0 0 16 16" fill="currentColor">
+      <path d="M8 13l-5-6h10l-5 6z" />
+    </svg>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
 
 export function DefaultActionBrowser() {
-  const [searchQuery, setSearchQuery] = useState('');
+  const { filters, actions, meta } = useFilterState();
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
-  const searchRef = useRef<HTMLInputElement>(null);
+  const [sort, setSort] = useState<SortState>(null);
 
-  const grouped = useMemo<GroupedActions>(() => {
-    const groups: GroupedActions = {};
-    for (const action of defaultActions) {
-      if (!groups[action.mapName]) groups[action.mapName] = [];
-      groups[action.mapName].push(action);
-    }
-    return groups;
-  }, []);
-
-  const filteredGroups = useMemo<GroupedActions>(() => {
-    if (!searchQuery.trim()) return grouped;
-
-    const query = searchQuery.toLowerCase();
-    const result: GroupedActions = {};
-
-    for (const [mapName, actions] of Object.entries(grouped)) {
-      const filtered = actions.filter((action) => {
-        const label = resolveLabel(action.label).toLowerCase();
-        const desc = resolveLabel(action.description).toLowerCase();
-        const name = action.actionName.toLowerCase();
-        const map = mapName.toLowerCase();
-        return (
-          label.includes(query) ||
-          desc.includes(query) ||
-          name.includes(query) ||
-          map.includes(query)
-        );
-      });
-      if (filtered.length > 0) result[mapName] = filtered;
-    }
-    return result;
-  }, [grouped, searchQuery]);
-
-  const totalShown = useMemo(
-    () => Object.values(filteredGroups).reduce((sum, arr) => sum + arr.length, 0),
-    [filteredGroups],
-  );
-
-  const sortedMapNames = useMemo(
-    () => Object.keys(filteredGroups).sort(),
-    [filteredGroups],
-  );
-
-  const handleSearchChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value),
+  const availableActionMaps = useMemo(
+    () => getUniqueActionMaps(defaultActions),
     [],
+  );
+
+  const filtered = useMemo(
+    () => filterActions(defaultActions, filters),
+    [filters],
+  );
+
+  const grouped = useMemo(
+    () => groupActionsByMap(filtered),
+    [filtered],
   );
 
   const toggleGroup = useCallback((mapName: string) => {
@@ -89,176 +134,255 @@ export function DefaultActionBrowser() {
   }, []);
 
   const collapseAll = useCallback(() => {
-    setCollapsedGroups(new Set(sortedMapNames));
-  }, [sortedMapNames]);
+    setCollapsedGroups(new Set(grouped.map(([name]) => name)));
+  }, [grouped]);
 
   const expandAll = useCallback(() => {
     setCollapsedGroups(new Set());
   }, []);
 
+  const handleSort = useCallback((col: SortColumn) => {
+    setSort((prev) => {
+      if (!prev || prev.column !== col) return { column: col, direction: 'asc' };
+      if (prev.direction === 'asc') return { column: col, direction: 'desc' };
+      return null; // third click clears
+    });
+  }, []);
+
+  // Build visible columns array once
+  const visibleCols = useMemo(() => {
+    const cols: { key: SortColumn; label: string; type: string }[] = [];
+    if (filters.inputTypes.has('keyboard')) cols.push({ key: 'keyboard', label: 'Keyboard', type: 'kbd' });
+    if (filters.inputTypes.has('mouse')) cols.push({ key: 'mouse', label: 'Mouse', type: 'mouse' });
+    if (filters.inputTypes.has('gamepad')) cols.push({ key: 'gamepad', label: 'Gamepad', type: 'gamepad' });
+    if (filters.inputTypes.has('joystick')) cols.push({ key: 'joystick', label: 'Joystick', type: 'joystick' });
+    return cols;
+  }, [filters.inputTypes]);
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-0">
+      {/* Unified Filter Bar */}
+      <FilterBar
+        filters={filters}
+        actions={actions}
+        meta={meta}
+        availableActionMaps={availableActionMaps}
+      />
+
       {/* Header info */}
-      <div className="flex items-center justify-between text-sm text-zinc-500 dark:text-zinc-400">
-        <span>Star Citizen {SC_VERSION} Default Bindings</span>
-        <span>
-          {totalShown} of {defaultActions.length} actions &middot;{' '}
-          {sortedMapNames.length} action maps
+      <div className="flex items-center justify-between text-sm text-text-secondary px-1 pt-4 pb-2">
+        <span className="font-display text-xs">Star Citizen {SC_VERSION} Default Bindings</span>
+        <span className="text-xs">
+          {filtered.length} of {defaultActions.length} actions &middot;{' '}
+          {grouped.length} maps
         </span>
       </div>
 
-      {/* Search */}
-      <div className="relative">
-        <input
-          ref={searchRef}
-          type="text"
-          value={searchQuery}
-          onChange={handleSearchChange}
-          placeholder="Search actions, bindings, action maps..."
-          className="w-full px-4 py-2 pl-10 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <svg
-          className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
-        </svg>
-      </div>
-
-      {/* Collapse/Expand controls */}
-      <div className="flex items-center gap-2">
-        <button
-          onClick={collapseAll}
-          className="text-xs text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors"
-        >
-          Collapse all
-        </button>
-        <span className="text-zinc-300 dark:text-zinc-600">|</span>
-        <button
-          onClick={expandAll}
-          className="text-xs text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors"
-        >
-          Expand all
-        </button>
-      </div>
-
-      {/* Grouped action tables */}
-      <div className="space-y-2">
-        {sortedMapNames.map((mapName) => {
-          const actions = filteredGroups[mapName];
-          const isCollapsed = collapsedGroups.has(mapName);
-
-          return (
-            <div
-              key={mapName}
-              className="rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden"
-            >
-              {/* Group header */}
-              <button
-                onClick={() => toggleGroup(mapName)}
-                className="w-full flex items-center justify-between px-4 py-2.5 bg-zinc-100 dark:bg-zinc-800/80 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors text-left"
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-zinc-400 dark:text-zinc-500 w-4">
-                    {isCollapsed ? '▶' : '▼'}
-                  </span>
-                  <span className="font-medium text-zinc-900 dark:text-zinc-100">
-                    {formatMapName(mapName)}
-                  </span>
-                  <span className="text-xs font-mono text-zinc-400 dark:text-zinc-500">
-                    {mapName}
-                  </span>
-                </div>
-                <span className="text-xs text-zinc-500 dark:text-zinc-400">
-                  {actions.length} actions
-                </span>
-              </button>
-
-              {/* Action table */}
-              {!isCollapsed && (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/50 text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                        <th className="text-left px-4 py-2 font-medium">Action</th>
-                        <th className="text-left px-3 py-2 font-medium">Keyboard</th>
-                        <th className="text-left px-3 py-2 font-medium">Mouse</th>
-                        <th className="text-left px-3 py-2 font-medium">Gamepad</th>
-                        <th className="text-left px-3 py-2 font-medium">Joystick</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                      {actions.map((action) => (
-                        <ActionRow key={action.actionName} action={action} />
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Empty state */}
-      {sortedMapNames.length === 0 && (
-        <div className="text-center py-12 text-zinc-500 dark:text-zinc-400">
-          <p className="text-lg">No actions found</p>
-          <p className="text-sm mt-1">Try adjusting your search</p>
+      {/* View content */}
+      {filters.activeView === 'card' ? (
+        /* Card View */
+        filtered.length > 0 ? (
+          <CardView actions={filtered} inputTypes={filters.inputTypes} />
+        ) : (
+          <div className="text-center py-12 text-text-muted">
+            <p className="text-lg">No actions found</p>
+            <p className="text-sm mt-1">Try adjusting your filters</p>
+          </div>
+        )
+      ) : filters.activeView === 'controller' ? (
+        /* Controller View placeholder */
+        <div className="text-center py-16 text-text-muted">
+          <p className="text-lg">Controller Visual View</p>
+          <p className="text-sm mt-1">Coming soon — interactive controller diagram</p>
         </div>
+      ) : (
+        /* Table View (default) */
+        <>
+          {/* Collapse/Expand controls */}
+          <div className="flex items-center gap-2 px-1 pb-3">
+            <button
+              onClick={collapseAll}
+              className="text-xs text-text-muted hover:text-text transition-colors"
+            >
+              Collapse all
+            </button>
+            <span className="text-border">|</span>
+            <button
+              onClick={expandAll}
+              className="text-xs text-text-muted hover:text-text transition-colors"
+            >
+              Expand all
+            </button>
+          </div>
+
+          {/* Grouped action tables */}
+          <div className="space-y-2">
+            {grouped.map(([mapName, mapActions]) => {
+              const isCollapsed = collapsedGroups.has(mapName);
+              const sorted = sort ? sortActions(mapActions, sort) : mapActions;
+
+              return (
+                <div
+                  key={mapName}
+                  className="rounded-lg border border-border overflow-hidden"
+                >
+                  {/* Sticky group header */}
+                  <button
+                    onClick={() => toggleGroup(mapName)}
+                    className="w-full flex items-center justify-between px-4 py-2.5 bg-surface hover:bg-surface-hover transition-colors text-left sticky top-0 z-[5]"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-text-muted w-4">
+                        {isCollapsed ? '▶' : '▼'}
+                      </span>
+                      <span className="font-medium text-text">
+                        {formatMapName(mapName)}
+                      </span>
+                      <span className="text-xs font-mono text-text-dim">
+                        {mapName}
+                      </span>
+                    </div>
+                    <span className="text-xs text-text-muted">
+                      {mapActions.length} actions
+                    </span>
+                  </button>
+
+                  {/* Content */}
+                  {!isCollapsed && (
+                    <>
+                      {/* Desktop table */}
+                      <div className="hidden md:block overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b border-border bg-surface-dim text-xs text-text-muted uppercase tracking-wider">
+                              <th className="text-left px-4 py-2 font-medium">
+                                <button
+                                  onClick={() => handleSort('label')}
+                                  className="inline-flex items-center gap-1 hover:text-text transition-colors"
+                                >
+                                  Action
+                                  <SortIcon
+                                    active={sort?.column === 'label'}
+                                    direction={sort?.column === 'label' ? sort.direction : null}
+                                  />
+                                </button>
+                              </th>
+                              {visibleCols.map((col) => (
+                                <th key={col.key} className="text-left px-3 py-2 font-medium">
+                                  <button
+                                    onClick={() => handleSort(col.key)}
+                                    className="inline-flex items-center gap-1 hover:text-text transition-colors"
+                                  >
+                                    {col.label}
+                                    <SortIcon
+                                      active={sort?.column === col.key}
+                                      direction={sort?.column === col.key ? sort.direction : null}
+                                    />
+                                  </button>
+                                </th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-border-subtle">
+                            {sorted.map((action) => (
+                              <tr
+                                key={action.actionName}
+                                className="hover:bg-surface-hover transition-colors"
+                              >
+                                <td className="px-4 py-2">
+                                  <div>
+                                    <span className="font-medium text-text">
+                                      {resolveLabel(action.label)}
+                                    </span>
+                                    {action.description && (
+                                      <p className="text-xs text-text-secondary mt-0.5 line-clamp-1">
+                                        {resolveLabel(action.description)}
+                                      </p>
+                                    )}
+                                    <span className="text-[10px] font-mono text-text-dim">
+                                      {action.actionName}
+                                    </span>
+                                  </div>
+                                </td>
+                                {visibleCols.map((col) => {
+                                  const bind = getBind(action, col.key);
+                                  return (
+                                    <td key={col.key} className="px-3 py-2">
+                                      {bind ? (
+                                        <span className={`inline-block px-1.5 py-0.5 rounded text-xs font-mono ${BIND_COLORS[col.type] ?? 'bg-surface-elevated text-text-secondary'}`}>
+                                          {formatBind(bind)}
+                                        </span>
+                                      ) : (
+                                        <span className="text-text-dim">&mdash;</span>
+                                      )}
+                                    </td>
+                                  );
+                                })}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      {/* Mobile card layout */}
+                      <div className="md:hidden divide-y divide-border-subtle">
+                        {sorted.map((action) => (
+                          <div
+                            key={action.actionName}
+                            className="px-4 py-3 space-y-2"
+                          >
+                            <div>
+                              <span className="font-medium text-text text-sm">
+                                {resolveLabel(action.label)}
+                              </span>
+                              {action.description && (
+                                <p className="text-xs text-text-secondary mt-0.5">
+                                  {resolveLabel(action.description)}
+                                </p>
+                              )}
+                              <span className="text-[10px] font-mono text-text-dim">
+                                {action.actionName}
+                              </span>
+                            </div>
+                            <div className="flex flex-wrap gap-1.5">
+                              {visibleCols.map((col) => {
+                                const bind = getBind(action, col.key);
+                                if (!bind) return null;
+                                return (
+                                  <span
+                                    key={col.key}
+                                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-mono ${BIND_COLORS[col.type]}`}
+                                  >
+                                    <span className="text-[10px] opacity-60 uppercase font-body">
+                                      {col.label.slice(0, 3)}
+                                    </span>
+                                    {formatBind(bind)}
+                                  </span>
+                                );
+                              })}
+                              {visibleCols.every((col) => !getBind(action, col.key)) && (
+                                <span className="text-xs text-text-dim">No bindings</span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Empty state */}
+          {grouped.length === 0 && (
+            <div className="text-center py-12 text-text-muted">
+              <p className="text-lg">No actions found</p>
+              <p className="text-sm mt-1">Try adjusting your filters</p>
+            </div>
+          )}
+        </>
       )}
     </div>
-  );
-}
-
-function ActionRow({ action }: { action: SCDefaultAction }) {
-  const label = resolveLabel(action.label);
-  const description = resolveLabel(action.description);
-
-  return (
-    <tr className="hover:bg-zinc-50 dark:hover:bg-zinc-800/40 transition-colors">
-      <td className="px-4 py-2">
-        <div>
-          <span className="font-medium text-zinc-900 dark:text-zinc-100">
-            {label}
-          </span>
-          {description && (
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 line-clamp-1">
-              {description}
-            </p>
-          )}
-          <span className="text-[10px] font-mono text-zinc-400 dark:text-zinc-600">
-            {action.actionName}
-          </span>
-        </div>
-      </td>
-      <BindCell bind={action.keyboardBind} />
-      <BindCell bind={action.mouseBind} />
-      <BindCell bind={action.gamepadBind} />
-      <BindCell bind={action.joystickBind} />
-    </tr>
-  );
-}
-
-function BindCell({ bind }: { bind: string | null }) {
-  if (!bind) {
-    return (
-      <td className="px-3 py-2 text-zinc-300 dark:text-zinc-700">&mdash;</td>
-    );
-  }
-
-  return (
-    <td className="px-3 py-2">
-      <span className="inline-block px-1.5 py-0.5 rounded text-xs font-mono bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200">
-        {formatBind(bind)}
-      </span>
-    </td>
   );
 }

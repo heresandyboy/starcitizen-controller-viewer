@@ -18,6 +18,8 @@
     "generate:actions": "npx tsx scripts/generate-actions.ts"
   },
   "dependencies": {
+    "@fontsource-variable/fira-code": "^5.2.7",
+    "@fontsource/fira-sans": "^5.2.7",
     "fast-xml-parser": "^5.3.3",
     "fuse.js": "^7.1.0",
     "next": "16.1.3",

@@ -4,6 +4,12 @@ export { GameActionBrowser } from './GameActionBrowser';
 export { GameActionUploader } from './GameActionUploader';
 export { DefaultActionBrowser } from './DefaultActionBrowser';
 
+// Filter bar
+export { FilterBar } from './FilterBar';
+
+// Views
+export { CardView } from './CardView';
+
 // Legacy components (reWASD-centric)
 export { ConfigUploader } from './ConfigUploader';
 export { ControllerInput } from './ControllerInput';

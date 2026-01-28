@@ -9,22 +9,22 @@ export default function Home() {
   const [showUploader, setShowUploader] = useState(false);
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
-      <header className="border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+      <header className="border-b border-border bg-surface">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+            <h1 className="text-xl font-semibold font-display text-text">
               Star Citizen Controller Viewer
             </h1>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+            <p className="text-sm text-text-secondary mt-1">
               View and search your Star Citizen keybindings
             </p>
           </div>
           {!customState && (
             <button
               onClick={() => setShowUploader(!showUploader)}
-              className="text-sm px-3 py-1.5 rounded-lg border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              className="text-sm px-3 py-1.5 rounded-md border border-border text-text-secondary hover:text-text hover:bg-surface-hover hover:border-primary/30 transition-colors focus-ring"
             >
               {showUploader ? 'View Defaults' : 'Load Custom Config'}
             </button>
@@ -32,7 +32,7 @@ export default function Home() {
           {customState && (
             <button
               onClick={() => setCustomState(null)}
-              className="text-sm px-3 py-1.5 rounded-lg border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              className="text-sm px-3 py-1.5 rounded-md border border-border text-text-secondary hover:text-text hover:bg-surface-hover hover:border-primary/30 transition-colors focus-ring"
             >
               Back to Defaults
             </button>
@@ -46,7 +46,7 @@ export default function Home() {
           <GameActionBrowser state={customState} />
         ) : showUploader ? (
           <div className="max-w-md mx-auto">
-            <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-100 mb-4 text-center">
+            <h2 className="text-lg font-medium text-text mb-4 text-center">
               Load Your Config Files
             </h2>
             <GameActionUploader onStateLoaded={(state) => { setCustomState(state); setShowUploader(false); }} />
@@ -57,8 +57,8 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-zinc-200 dark:border-zinc-800 mt-auto">
-        <div className="max-w-6xl mx-auto px-4 py-4 text-center text-sm text-zinc-500 dark:text-zinc-400">
+      <footer className="border-t border-border mt-auto">
+        <div className="max-w-6xl mx-auto px-4 py-4 text-center text-sm text-text-muted">
           Star Citizen default bindings. Use &ldquo;Load Custom Config&rdquo; to overlay your own XML.
         </div>
       </footer>
