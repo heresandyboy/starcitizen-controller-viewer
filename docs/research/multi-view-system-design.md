@@ -718,15 +718,110 @@ Phase 5: Polish
 
 ## 9. Open Questions
 
-1. **Sub-layer behavior:** When "Sub (Menu)" is active, are Main layer bindings still available for buttons not overridden? Need to check the reWASD `unheritableMasks` logic.
+### Q1: Sub-layer behavior — do Main layer bindings fall through?
 
-2. **Default SC bindings as fallback:** When a reWASD macro outputs a key that has no SC XML custom binding, should we fall back to SC default keyboard bindings (from `defaultActions.ts`)? This would resolve more chains but adds complexity.
+**Answer: Yes, with exceptions.**
 
-3. **Analog stick handling:** The controller visual shows stick-click (LS/RS), but stick directions (LSUp, LSDown, etc.) are also mapped in reWASD. Should these be shown as separate zones on the stick, or collapsed?
+Researched in GCO 4.7 HOTAS.rewasd. Sub-layers only override specific buttons — unoverridden buttons inherit from the parent layer.
 
-4. **Profile switching:** GCO uses a radial menu layer for profile switching. Should this be shown as a special layer, or treated as an advanced feature shown separately?
+**Evidence:** Shift 6 ("Sub (Menu)") has 47 mappings covering: D-pad (masks 16-17), paddles (14-15), all stick zones (22-29, 38-43), triggers (20-21), and layer-exit jumps (7-8). Notably **face buttons (A, B, X, Y), bumpers (LB, RB), and stick clicks are NOT mapped in Shift 6** — these fall through to the parent Menu layer (Shift 3), or ultimately to Main if Menu doesn't override them either.
 
-5. **Localization of action names:** The current `localization.ts` has `@ui_*` key → English mapping. The GCO descriptions are in French. Should we show both, or only resolved English names?
+The `unheritableMasks` property is the exception. Only Shift 4 ("Select/View") uses it, blocking masks 24-25 (LeftStickLeft, LeftStickRight). These stick directions are **completely disabled** in the Select layer — they don't fall through to Main.
+
+**Implication for the viewer:** When displaying a sub-layer, we must show a merged view: the sub-layer's own mappings + inherited parent mappings for buttons not explicitly mapped. Inherited bindings should be visually distinguished (e.g., slightly dimmed, or tagged "inherited from Main").
+
+The layer hierarchy for GCO 4.7:
+
+```
+Main (default, no modifier)
+├── LB (hold Left Bumper)
+│   └── Y (hold Y while in LB) → enters Y layer, release exits
+├── Y (hold Y)
+│   └── Sub (Y) / Shift 10 (LS click while in Y layer)
+├── Menu (Xbox/Home button)
+│   └── Sub (Menu) / Shift 6 (View or Menu button while in Menu layer)
+├── Select/View (hold View button)
+├── Start (hold Start button)
+├── LS Bump (hold Left Stick click)
+├── Down Pad LR / Shift 7 (Left Lower Paddle)
+├── EMPTY / Shift 9 (unused)
+└── MAIN MENU / Shift 11 (radial menu, type=radialMenu)
+```
+
+Layer-exit behavior: Most layers return to Main (layer 0) on release of the modifier button. Sub-layers return to their parent layer (Shift 6 returns to Menu/Shift 3).
+
+### Q2: Should we fall back to SC default keyboard bindings?
+
+**Answer: Yes.**
+
+The user's custom XML only overrides specific bindings. Any keyboard key that reWASD outputs but which has no `kb1_*` entry in the custom XML will still work in-game if SC has a default binding for that key.
+
+**Implementation:** After resolving against the custom XML, any unresolved keyboard keys should be looked up in `defaultActions.ts`. These resolved-via-defaults bindings should be tagged `source: 'rewasd+default'` to distinguish them from custom XML chains (`rewasd+xml`). The UI should show these with a subtle indicator like "(SC default)" so the user understands this binding isn't from the custom XML but still works.
+
+This will significantly reduce the number of "unresolved" bindings and give a more complete picture.
+
+### Q3: How should analog stick zones be shown?
+
+**Answer: Show both click AND directional zones — they are distinct, heavily-used inputs.**
+
+The Xbox Elite 2 controller supports both stick click (L3/R3) and stick directional movement as completely independent inputs. reWASD maps both extensively.
+
+**Stick inputs found in GCO 4.7:**
+
+| Input Type | Masks | Example |
+| ---------- | ----- | ------- |
+| Stick click (LS) | 9, 44 | Layer activator for Shift 8 |
+| Stick click (RS) | 10 | Various actions per layer |
+| Cardinal directions (LS) | 22-25 | LeftStickUp/Down/Left/Right |
+| Cardinal directions (RS) | 26-29 | RightStickUp/Down/Left/Right |
+| Zone rings (LS) | 38-40 | LowZone / MedZone / HighZone |
+| Zone rings (RS) | 41-43 | LowZone / MedZone / HighZone |
+| Directional zones (LS) | 30-37 | LowUpZone, MedDownZone, HighLeftZone, etc. |
+
+That's **up to 22 distinct stick inputs per stick** (click + 4 cardinal + 3 rings + directional variants).
+
+**For the Controller Visual (View 5.4):**
+
+- Show each stick as a circular zone diagram (concentric rings for low/med/high zones, cardinal direction sectors)
+- Stick click shown as center button
+- On hover, each zone highlights and shows its binding
+- This is essentially a mini radial display embedded in the stick area of the controller SVG
+
+**For the Layer Browser (View 5.1):**
+
+- Group stick zones under a "Left Stick" / "Right Stick" collapsible section
+- Show click, cardinals, and zone rings as sub-rows
+
+### Q4: What is the radial menu layer and how should it be shown?
+
+**Answer: It's a reWASD overlay menu (not an in-game radial menu). Show it as a special layer.**
+
+Researched: Shift 11 ("MAIN MENU", type `radialMenu`) is a **reWASD-level radial menu** — a visual overlay that reWASD displays on screen when activated. It is NOT a Star Citizen in-game radial menu.
+
+**How it works:**
+
+- Activated by holding Menu/Start button (mask 46) from the Main layer
+- reWASD shows a radial overlay with 2 circles (a main ring of 3 sectors, one of which expands to a sub-ring of 2 sectors)
+- The user navigates with the stick to select a sector
+- Buttons in this layer fire keyboard macros for SC actions (ESC sequences, Ctrl+Alt combos, etc.)
+- Releasing exits back to Main (layer 0)
+
+**Shift 11 mappings found:** 46 mappings including ESC→ESC sequences (likely for SC menu navigation), Ctrl+Delete/End combos, and stick zone hold-bindings for radial navigation.
+
+**For the viewer:** Show "MAIN MENU" as a distinct layer tab with a special icon (radial/pie icon). In the Controller Visual, when this layer is active, show the radial menu sectors as an overlay diagram rather than button-by-button. The sectors map to specific SC actions, which can be shown as labels on each sector.
+
+### Q5: How should French reWASD descriptions be handled?
+
+**Answer: Show resolved English action names as primary. Show French descriptions as secondary/debug info.**
+
+The user only speaks English. The GCO profile creator is French, so the `description` fields in the .rewasd file are in French. These descriptions are the creator's notes, not official labels.
+
+**Implementation:**
+
+- Primary display: Always use the resolved SC action display name in English (from `scActions.ts` and `localization.ts`)
+- Secondary: Show the French description in a "debug" or "raw" tooltip/expandable section for reference
+- Never use the French description as the main label
+- If an action is unresolved (no SC action found), show the keyboard keys output as the label, with the French description as supplementary context
 
 ---
 
