@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import type { GameActionState, GameplayMode } from '@/lib/types/unified';
 import type { BindingIndex } from '@/lib/types/binding';
-import { DefaultActionBrowser, GameActionUploader, LayerBrowser, ActionSearch } from '@/components';
+import { DefaultActionBrowser, GameActionUploader, LayerBrowser, ActionSearch, ModeCheatSheet } from '@/components';
 import {
   parseXmlToGameActions,
   parseRewasdJson,
@@ -18,7 +18,7 @@ import { ConfigSelector } from '@/components/ConfigSelector';
 const DEFAULT_XML = '/configs/layout_GCO-4-7-HOTAS.xml';
 const DEFAULT_REWASD = '/configs/GCO 4.7 HOTAS.rewasd';
 
-type ViewTab = 'actions' | 'layers' | 'search';
+type ViewTab = 'actions' | 'layers' | 'search' | 'cheatsheet';
 
 interface LoadedData {
   actionState: GameActionState;
@@ -85,6 +85,7 @@ export default function Home() {
     { id: 'actions', label: 'Actions', available: true },
     { id: 'layers', label: 'Layer Browser', available: bindingIndex !== null },
     { id: 'search', label: 'Action Search', available: bindingIndex !== null },
+    { id: 'cheatsheet', label: 'Cheat Sheet', available: bindingIndex !== null },
   ];
 
   return (
@@ -181,6 +182,10 @@ export default function Home() {
 
         {activeView === 'search' && bindingIndex && (
           <ActionSearch bindingIndex={bindingIndex} />
+        )}
+
+        {activeView === 'cheatsheet' && bindingIndex && (
+          <ModeCheatSheet bindingIndex={bindingIndex} />
         )}
       </main>
 
