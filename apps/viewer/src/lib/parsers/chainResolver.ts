@@ -431,3 +431,347 @@ export function searchMappings(
     );
   });
 }
+
+// ============================================================================
+// V2 Chain Resolver — Per-Step Macro Resolution with BindingIndex
+// ============================================================================
+
+import type {
+  ParseRewasdResultV2,
+} from './rewasdParser';
+import type {
+  ResolvedBinding,
+  ResolvedAction,
+  BindingIndex,
+  BindingStats,
+  BindingSource,
+  ShiftLayer,
+  MacroStepResolved,
+} from '../types/binding';
+import type { ActivatorType } from '../types/rewasd';
+import type { SCDefaultAction } from '../types/defaultProfile';
+import {
+  keyToScKeyboard,
+  REWASD_GP_OUTPUT_TO_SC,
+} from '../constants/keyMappings';
+
+let v2IdCounter = 0;
+
+function generateV2Id(button: string, layerId: number, activatorType: string): string {
+  return `${button}-${layerId}-${activatorType}-${++v2IdCounter}`;
+}
+
+/**
+ * Build a lookup map from SC keyboard key (e.g., "insert") to default actions.
+ * The default actions use "key+modifier" format like "u+lshift" which we normalize.
+ */
+function buildDefaultKeyboardMap(
+  defaults: SCDefaultAction[]
+): Map<string, SCDefaultAction[]> {
+  const map = new Map<string, SCDefaultAction[]>();
+  for (const action of defaults) {
+    if (!action.keyboardBind) continue;
+    // defaultProfile uses format like "u+lshift" — the first part is the key
+    const normalizedKey = action.keyboardBind.split('+')[0].toLowerCase();
+    const existing = map.get(normalizedKey) ?? [];
+    existing.push(action);
+    map.set(normalizedKey, existing);
+  }
+  return map;
+}
+
+/**
+ * Resolve a single macro step against SC XML bindings and/or default actions.
+ * Mutates the step's resolvedAction field and returns any ResolvedActions found.
+ */
+function resolveStep(
+  step: MacroStepResolved,
+  stepIndex: number,
+  keyToAction: Map<string, ParsedXmlBinding[]>,
+  gamepadToAction: Map<string, ParsedXmlBinding[]>,
+  defaultKeyboardMap: Map<string, SCDefaultAction[]>
+): { actions: ResolvedAction[]; resolvedVia: 'keyboard' | 'gamepad' | null; usedDefault: boolean } {
+  const actions: ResolvedAction[] = [];
+  let usedDefault = false;
+
+  // Only resolve "down" events (or steps without action — those are implicit presses)
+  if (step.action === 'up') {
+    return { actions, resolvedVia: null, usedDefault };
+  }
+
+  if (step.type === 'keyboard' && step.key) {
+    const scKey = keyToScKeyboard(step.key);
+    if (!scKey) return { actions, resolvedVia: 'keyboard', usedDefault };
+
+    // Try custom XML bindings first
+    const xmlBindings = keyToAction.get(scKey);
+    if (xmlBindings && xmlBindings.length > 0) {
+      for (const xml of xmlBindings) {
+        actions.push({
+          name: xml.actionName,
+          displayName: getActionDisplayName(xml.actionName),
+          actionMap: xml.actionMap,
+          gameplayMode: getGameplayMode(xml.actionMap),
+          macroStepIndex: stepIndex,
+          resolvedVia: 'keyboard',
+          matchedInput: `kb1_${scKey}`,
+        });
+      }
+      return { actions, resolvedVia: 'keyboard', usedDefault: false };
+    }
+
+    // Fall back to SC defaults
+    const defaultActions = defaultKeyboardMap.get(scKey);
+    if (defaultActions && defaultActions.length > 0) {
+      for (const def of defaultActions) {
+        actions.push({
+          name: def.actionName,
+          displayName: getActionDisplayName(def.actionName),
+          actionMap: def.mapName,
+          gameplayMode: getGameplayMode(def.mapName),
+          macroStepIndex: stepIndex,
+          resolvedVia: 'keyboard',
+          matchedInput: `kb1_${scKey}`,
+        });
+      }
+      return { actions, resolvedVia: 'keyboard', usedDefault: true };
+    }
+
+    return { actions, resolvedVia: 'keyboard', usedDefault };
+  }
+
+  if (step.type === 'gamepad' && step.gamepadButton) {
+    // Map reWASD output name back to SC gamepad name
+    // REWASD_GP_OUTPUT_NAMES maps buttonId → display name (e.g., 33 → "DpadUp")
+    // REWASD_GP_OUTPUT_TO_SC maps buttonId → SC name (e.g., 33 → "dpad_up")
+    // But step.gamepadButton is already the display name. We need SC name.
+    // Find the SC name by looking up through the output names table.
+    const scGamepadKey = findScGamepadKey(step.gamepadButton);
+    if (!scGamepadKey) return { actions, resolvedVia: 'gamepad', usedDefault };
+
+    const xmlBindings = gamepadToAction.get(scGamepadKey);
+    if (xmlBindings && xmlBindings.length > 0) {
+      for (const xml of xmlBindings) {
+        actions.push({
+          name: xml.actionName,
+          displayName: getActionDisplayName(xml.actionName),
+          actionMap: xml.actionMap,
+          gameplayMode: getGameplayMode(xml.actionMap),
+          macroStepIndex: stepIndex,
+          resolvedVia: 'gamepad',
+          matchedInput: `gp1_${scGamepadKey}`,
+        });
+      }
+    }
+    return { actions, resolvedVia: 'gamepad', usedDefault };
+  }
+
+  return { actions, resolvedVia: null, usedDefault };
+}
+
+/**
+ * Map a reWASD gamepad output display name (e.g., "DpadUp") back to SC name (e.g., "dpad_up").
+ */
+function findScGamepadKey(displayName: string): string | undefined {
+  // Reverse lookup: display name → SC key name
+  for (const [idStr, scKey] of Object.entries(REWASD_GP_OUTPUT_TO_SC)) {
+    const id = Number(idStr);
+    const name = REWASD_GP_OUTPUT_NAMES[id];
+    if (name === displayName) return scKey;
+  }
+  return undefined;
+}
+
+import { REWASD_GP_OUTPUT_NAMES } from '../constants/keyMappings';
+
+/**
+ * Determine the BindingSource from resolution results.
+ */
+function determineSource(
+  resolvedVias: Set<'keyboard' | 'gamepad'>,
+  usedDefault: boolean,
+  hasActions: boolean
+): BindingSource {
+  if (!hasActions) return 'rewasd-unresolved';
+  if (usedDefault) return 'rewasd+default';
+  if (resolvedVias.has('gamepad') && resolvedVias.has('keyboard')) return 'rewasd+xml';
+  if (resolvedVias.has('gamepad')) return 'rewasd+xml-gamepad';
+  return 'rewasd+xml';
+}
+
+/**
+ * Resolve all reWASD v2 mappings against SC XML bindings and produce a BindingIndex.
+ *
+ * This is the v2 chain resolver that walks each macro step individually,
+ * resolves keyboard steps via kb1_* and gamepad steps via gp1_*, and
+ * builds a pre-indexed query structure for all views.
+ */
+export function resolveBindingsV2(
+  rewasdResult: ParseRewasdResultV2,
+  xmlResult: ParseXmlResult,
+  defaults: SCDefaultAction[] = [],
+): BindingIndex {
+  v2IdCounter = 0;
+
+  const keyToAction = buildKeyToActionMap(xmlResult.bindings);
+  const gamepadToAction = buildGamepadToActionMap(xmlResult.bindings);
+  const defaultKeyboardMap = buildDefaultKeyboardMap(defaults);
+
+  const layers = rewasdResult.layers;
+  const layerMap = new Map<number, ShiftLayer>();
+  for (const layer of layers) layerMap.set(layer.id, layer);
+
+  // Main layer (id=0) used when shiftId is undefined
+  const mainLayer = layerMap.get(0) ?? { id: 0, name: 'Main', isDefault: true };
+
+  const bindings: ResolvedBinding[] = [];
+
+  for (const mapping of rewasdResult.mappings) {
+    const layer = mapping.shiftId !== undefined
+      ? layerMap.get(mapping.shiftId) ?? mainLayer
+      : mainLayer;
+
+    const resolvedVias = new Set<'keyboard' | 'gamepad'>();
+    let usedDefault = false;
+    const allActions: ResolvedAction[] = [];
+
+    // Walk each macro step and resolve
+    const resolvedSteps: MacroStepResolved[] = [];
+    for (let i = 0; i < mapping.macro.steps.length; i++) {
+      const step = { ...mapping.macro.steps[i] };
+      const result = resolveStep(step, i, keyToAction, gamepadToAction, defaultKeyboardMap);
+
+      if (result.resolvedVia) resolvedVias.add(result.resolvedVia);
+      if (result.usedDefault) usedDefault = true;
+
+      // Attach resolved action to step
+      if (result.actions.length > 0) {
+        step.resolvedAction = {
+          actionName: result.actions[0].name,
+          displayName: result.actions[0].displayName,
+          actionMap: result.actions[0].actionMap,
+          gameplayMode: result.actions[0].gameplayMode,
+        };
+      }
+
+      resolvedSteps.push(step);
+      allActions.push(...result.actions);
+    }
+
+    const source = determineSource(resolvedVias, usedDefault, allActions.length > 0);
+
+    const binding: ResolvedBinding = {
+      id: generateV2Id(mapping.buttonName, layer.id, mapping.activator.type),
+      button: mapping.buttonName,
+      layer,
+      activator: {
+        type: mapping.activator.type,
+        mode: mapping.activator.mode,
+        ...mapping.activator.params,
+      },
+      macro: {
+        ...mapping.macro,
+        steps: resolvedSteps,
+      },
+      actions: allActions,
+      source,
+      description: mapping.description,
+    };
+
+    bindings.push(binding);
+  }
+
+  return buildBindingIndex(bindings, layers);
+}
+
+/**
+ * Build the BindingIndex with all query maps from a flat list of bindings.
+ */
+export function buildBindingIndex(
+  bindings: ResolvedBinding[],
+  layers: ShiftLayer[]
+): BindingIndex {
+  const byButtonLayerActivator = new Map<string, Map<number, Map<ActivatorType, ResolvedBinding>>>();
+  const byAction = new Map<string, ResolvedBinding[]>();
+  const byMode = new Map<string, ResolvedBinding[]>();
+  const byLayer = new Map<number, ResolvedBinding[]>();
+  const byButton = new Map<string, ResolvedBinding[]>();
+  const bindingsPerLayer = new Map<number, number>();
+
+  const uniqueActions = new Set<string>();
+  let resolvedCount = 0;
+  let unresolvedCount = 0;
+  let multiActionCount = 0;
+
+  for (const binding of bindings) {
+    // byButtonLayerActivator
+    if (!byButtonLayerActivator.has(binding.button)) {
+      byButtonLayerActivator.set(binding.button, new Map());
+    }
+    const layerMap = byButtonLayerActivator.get(binding.button)!;
+    if (!layerMap.has(binding.layer.id)) {
+      layerMap.set(binding.layer.id, new Map());
+    }
+    layerMap.get(binding.layer.id)!.set(binding.activator.type, binding);
+
+    // byAction
+    for (const action of binding.actions) {
+      uniqueActions.add(action.name);
+      const existing = byAction.get(action.name) ?? [];
+      existing.push(binding);
+      byAction.set(action.name, existing);
+    }
+
+    // byMode
+    for (const action of binding.actions) {
+      const existing = byMode.get(action.gameplayMode) ?? [];
+      // Avoid duplicating if multiple actions in same binding have same mode
+      if (!existing.includes(binding)) {
+        existing.push(binding);
+        byMode.set(action.gameplayMode, existing);
+      }
+    }
+
+    // byLayer
+    const layerBindings = byLayer.get(binding.layer.id) ?? [];
+    layerBindings.push(binding);
+    byLayer.set(binding.layer.id, layerBindings);
+
+    // byButton
+    const buttonBindings = byButton.get(binding.button) ?? [];
+    buttonBindings.push(binding);
+    byButton.set(binding.button, buttonBindings);
+
+    // Stats
+    bindingsPerLayer.set(binding.layer.id, (bindingsPerLayer.get(binding.layer.id) ?? 0) + 1);
+    if (binding.source === 'rewasd-unresolved') {
+      unresolvedCount++;
+    } else {
+      resolvedCount++;
+    }
+    if (binding.actions.length > 1) {
+      multiActionCount++;
+    }
+  }
+
+  const stats: BindingStats = {
+    totalBindings: bindings.length,
+    resolvedBindings: resolvedCount,
+    unresolvedBindings: unresolvedCount,
+    multiActionBindings: multiActionCount,
+    layerCount: layers.length,
+    uniqueActionsTriggered: uniqueActions.size,
+    bindingsPerLayer,
+  };
+
+  return {
+    all: bindings,
+    layers,
+    byButtonLayerActivator: byButtonLayerActivator as BindingIndex['byButtonLayerActivator'],
+    byAction,
+    byMode: byMode as BindingIndex['byMode'],
+    byLayer,
+    byButton,
+    stats,
+  };
+}
