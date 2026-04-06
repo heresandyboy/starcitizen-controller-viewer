@@ -17,25 +17,11 @@ interface VoiceSearchProps {
   className?: string;
 }
 
-interface SpeechRecognitionEvent extends Event {
-  results: SpeechRecognitionResultList;
-  resultIndex: number;
-}
-
-interface SpeechRecognitionErrorEvent extends Event {
-  error: string;
-  message?: string;
-}
-
-// Web Speech API is not fully typed in TypeScript
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type SpeechRecognitionConstructor = new () => any;
+// Types from src/types/speech-recognition.d.ts (global declarations)
 
 function getSpeechRecognition(): SpeechRecognitionConstructor | null {
   if (typeof window === 'undefined') return null;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const win = window as any;
-  return win.SpeechRecognition || win.webkitSpeechRecognition || null;
+  return window.SpeechRecognition || window.webkitSpeechRecognition || null;
 }
 
 // ============================================================================
@@ -64,8 +50,7 @@ export function VoiceSearch({
   const [transcript, setTranscript] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   // Check support on mount
   useEffect(() => {
