@@ -104,19 +104,25 @@ function SortIcon({ active, direction }: { active: boolean; direction: SortDirec
 // Component
 // ---------------------------------------------------------------------------
 
-export function DefaultActionBrowser() {
+interface DefaultActionBrowserProps {
+  actions?: SCDefaultAction[];
+  title?: string;
+}
+
+export function DefaultActionBrowser({ actions: customActions, title }: DefaultActionBrowserProps = {}) {
+  const sourceActions = customActions ?? defaultActions;
   const { filters, actions, meta } = useFilterState();
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
   const [sort, setSort] = useState<SortState>(null);
 
   const availableActionMaps = useMemo(
-    () => getUniqueActionMaps(defaultActions),
-    [],
+    () => getUniqueActionMaps(sourceActions),
+    [sourceActions],
   );
 
   const filtered = useMemo(
-    () => filterActions(defaultActions, filters),
-    [filters],
+    () => filterActions(sourceActions, filters),
+    [sourceActions, filters],
   );
 
   const grouped = useMemo(
@@ -171,9 +177,9 @@ export function DefaultActionBrowser() {
 
       {/* Header info */}
       <div className="flex items-center justify-between text-sm text-text-secondary px-1 pt-4 pb-2">
-        <span className="font-display text-xs">Star Citizen {SC_VERSION} Default Bindings</span>
+        <span className="font-display text-xs">{title ?? `Star Citizen ${SC_VERSION} Default Bindings`}</span>
         <span className="text-xs">
-          {filtered.length} of {defaultActions.length} actions &middot;{' '}
+          {filtered.length} of {sourceActions.length} actions &middot;{' '}
           {grouped.length} maps
         </span>
       </div>

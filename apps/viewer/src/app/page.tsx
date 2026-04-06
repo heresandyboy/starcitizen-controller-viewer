@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import type { GameActionState, GameplayMode } from '@/lib/types/unified';
-import { DefaultActionBrowser, GameActionUploader, GameActionBrowser } from '@/components';
+import { DefaultActionBrowser, GameActionUploader } from '@/components';
 import { parseXmlToGameActions, parseRewasdJson, addRewasdTriggersToActions } from '@/lib/parsers';
+import { adaptGameActionsToSCDefaultActions } from '@/lib/adapters';
 import { ConfigSelector } from '@/components/ConfigSelector';
 
 const DEFAULT_XML = '/configs/layout_GCO-4-7-HOTAS.xml';
@@ -85,7 +86,10 @@ export default function Home() {
       {/* Main content */}
       <main className="max-w-6xl mx-auto px-4 py-8">
         {customState ? (
-          <GameActionBrowser state={customState} />
+          <DefaultActionBrowser
+            actions={adaptGameActionsToSCDefaultActions(customState.actions)}
+            title={customState.xmlFileName}
+          />
         ) : showUploader ? (
           <div className="max-w-md mx-auto">
             <h2 className="text-lg font-medium text-text mb-4 text-center">
