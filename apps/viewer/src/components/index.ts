@@ -1,3 +1,6 @@
+// Config selection
+export { ConfigSelector } from './ConfigSelector';
+
 // New action-centered components
 export { GameActionCard } from './GameActionCard';
 export { GameActionBrowser } from './GameActionBrowser';
