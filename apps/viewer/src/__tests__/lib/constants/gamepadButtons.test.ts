@@ -52,6 +52,8 @@ describe('gamepadButtons', () => {
       expect(REWASD_BUTTONS[40]).toBe('LSRight')
       expect(REWASD_BUTTONS[41]).toBe('LSUpLeft')
       expect(REWASD_BUTTONS[42]).toBe('LSUpRight')
+      expect(REWASD_BUTTONS[43]).toBe('LSDownLeft')
+      expect(REWASD_BUTTONS[44]).toBe('LSDownRight')
     })
 
     it('maps triggers correctly', () => {
@@ -64,6 +66,10 @@ describe('gamepadButtons', () => {
       expect(REWASD_BUTTONS[114]).toBe('RSDown')
       expect(REWASD_BUTTONS[115]).toBe('RSLeft')
       expect(REWASD_BUTTONS[116]).toBe('RSRight')
+      expect(REWASD_BUTTONS[117]).toBe('RSUpLeft')
+      expect(REWASD_BUTTONS[118]).toBe('RSUpRight')
+      expect(REWASD_BUTTONS[119]).toBe('RSDownLeft')
+      expect(REWASD_BUTTONS[120]).toBe('RSDownRight')
     })
   })
 
@@ -125,6 +131,13 @@ describe('gamepadButtons', () => {
     it('provides display names for stick directions', () => {
       expect(BUTTON_DISPLAY_NAMES['LSUp']).toBe('Left Stick Up')
       expect(BUTTON_DISPLAY_NAMES['RSDown']).toBe('Right Stick Down')
+    })
+
+    it('provides display names for diagonal stick zones', () => {
+      expect(BUTTON_DISPLAY_NAMES['LSUpLeft']).toBe('Left Stick Up-Left')
+      expect(BUTTON_DISPLAY_NAMES['LSDownRight']).toBe('Left Stick Down-Right')
+      expect(BUTTON_DISPLAY_NAMES['RSUpLeft']).toBe('Right Stick Up-Left')
+      expect(BUTTON_DISPLAY_NAMES['RSDownLeft']).toBe('Right Stick Down-Left')
     })
   })
 
