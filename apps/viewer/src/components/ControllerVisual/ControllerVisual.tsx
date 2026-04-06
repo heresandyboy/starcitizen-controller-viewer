@@ -1,11 +1,13 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useCallback, useState } from 'react';
 import type { BindingIndex, GameplayMode } from '@/lib/types/binding';
 import { useControllerState } from './useControllerState';
 import { ControllerSvg } from './ControllerSvg';
 import { ButtonDetailPanel } from './ButtonDetailPanel';
 import { getButtonDisplayName } from '@/lib/constants/gamepadButtons';
+import { useGamepad, isGamepadSupported } from '@/hooks/useGamepad';
+import type { ButtonState } from '@/hooks/useGamepad';
 
 interface ControllerVisualProps {
   bindingIndex: BindingIndex;
@@ -13,6 +15,26 @@ interface ControllerVisualProps {
 
 export function ControllerVisual({ bindingIndex }: ControllerVisualProps) {
   const [state, actions] = useControllerState(bindingIndex);
+  const [lastPhysicalButton, setLastPhysicalButton] = useState<string | null>(null);
+
+  // Physical controller input — select button when pressed
+  const handleButtonDown = useCallback((button: ButtonState) => {
+    setLastPhysicalButton(button.name);
+
+    // If this button triggers a layer, toggle it
+    const layer = actions.getLayerForTriggerButton(button.name);
+    if (layer) {
+      actions.toggleLayer(layer.id);
+    }
+
+    // Select the button to show detail panel
+    actions.selectButton(button.name);
+  }, [actions]);
+
+  useGamepad({
+    onButtonDown: handleButtonDown,
+    trackAxes: false,
+  });
 
   // Available modes
   const availableModes = useMemo(() => {
@@ -68,7 +90,12 @@ export function ControllerVisual({ bindingIndex }: ControllerVisualProps) {
 
       {/* Instruction */}
       <p className="text-xs text-zinc-500">
-        Click a button to see its bindings. Click LB, Y, Menu, etc. to switch shift layers.
+        Click a button or press it on your controller to see its bindings. Click LB, Y, Menu, etc. to switch shift layers.
+        {lastPhysicalButton && (
+          <span className="ml-2 text-blue-400">
+            Last pressed: {getButtonDisplayName(lastPhysicalButton)}
+          </span>
+        )}
       </p>
 
       {/* Main layout: SVG + detail panel */}
