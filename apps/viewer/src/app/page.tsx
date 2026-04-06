@@ -1,12 +1,50 @@
 'use client';
 
-import { useState } from 'react';
-import type { GameActionState } from '@/lib/types/unified';
+import { useEffect, useState } from 'react';
+import type { GameActionState, GameplayMode } from '@/lib/types/unified';
 import { DefaultActionBrowser, GameActionUploader, GameActionBrowser } from '@/components';
+import { parseXmlToGameActions, parseRewasdJson, addRewasdTriggersToActions } from '@/lib/parsers';
+
+const DEFAULT_XML = '/configs/layout_GCO-4-7-HOTAS.xml';
+const DEFAULT_REWASD = '/configs/GCO 4.7 HOTAS.rewasd';
+
+async function loadDefaultConfigs(): Promise<GameActionState> {
+  const [xmlRes, rewasdRes] = await Promise.all([
+    fetch(DEFAULT_XML),
+    fetch(DEFAULT_REWASD),
+  ]);
+
+  if (!xmlRes.ok) throw new Error(`Failed to load XML: ${xmlRes.statusText}`);
+  if (!rewasdRes.ok) throw new Error(`Failed to load reWASD: ${rewasdRes.statusText}`);
+
+  const [xmlText, rewasdText] = await Promise.all([xmlRes.text(), rewasdRes.text()]);
+
+  const xmlResult = parseXmlToGameActions(xmlText);
+  const rewasdResult = parseRewasdJson(rewasdText);
+  const actions = addRewasdTriggersToActions(xmlResult.actions, rewasdResult);
+
+  const categorySet = new Set<GameplayMode>();
+  for (const action of actions) categorySet.add(action.category);
+
+  return {
+    loaded: true,
+    xmlFileName: 'layout_GCO-4-7-HOTAS.xml',
+    rewasdFileName: 'GCO 4.7 HOTAS.rewasd',
+    actions,
+    availableCategories: Array.from(categorySet).sort(),
+  };
+}
 
 export default function Home() {
   const [customState, setCustomState] = useState<GameActionState | null>(null);
   const [showUploader, setShowUploader] = useState(false);
+  const [autoLoadError, setAutoLoadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadDefaultConfigs()
+      .then(setCustomState)
+      .catch((err) => setAutoLoadError(err instanceof Error ? err.message : String(err)));
+  }, []);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -52,7 +90,14 @@ export default function Home() {
             <GameActionUploader onStateLoaded={(state) => { setCustomState(state); setShowUploader(false); }} />
           </div>
         ) : (
-          <DefaultActionBrowser />
+          <>
+            {autoLoadError && (
+              <div className="mb-4 p-3 rounded-lg bg-error-subtle text-error text-sm">
+                Could not auto-load default configs: {autoLoadError}
+              </div>
+            )}
+            <DefaultActionBrowser />
+          </>
         )}
       </main>
 
