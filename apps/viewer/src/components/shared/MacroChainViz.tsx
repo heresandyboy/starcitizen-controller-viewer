@@ -20,8 +20,20 @@ function CompactChain({ binding, showRawKeys }: { binding: ResolvedBinding; show
     ? binding.macro.keyboardKeysOutput.join(' + ')
     : binding.macro.gamepadButtonsOutput.join(' + ');
 
-  const actionLabel = binding.actions.length > 0
-    ? binding.actions.map(a => a.displayName).join(' → ')
+  // Deduplicate action names — turbo macros repeat the same action hundreds of times
+  const uniqueActionNames: string[] = [];
+  const actionCounts = new Map<string, number>();
+  for (const a of binding.actions) {
+    actionCounts.set(a.displayName, (actionCounts.get(a.displayName) ?? 0) + 1);
+    if (!uniqueActionNames.includes(a.displayName)) {
+      uniqueActionNames.push(a.displayName);
+    }
+  }
+  const actionLabel = uniqueActionNames.length > 0
+    ? uniqueActionNames.map(name => {
+        const count = actionCounts.get(name)!;
+        return count > 1 ? `${name} (×${count})` : name;
+      }).join(' → ')
     : null;
 
   return (

@@ -714,12 +714,16 @@ export function buildBindingIndex(
     }
     layerMap.get(binding.layer.id)!.set(binding.activator.type, binding);
 
-    // byAction
+    // byAction (deduplicate: only add binding once per unique action name)
+    const seenActions = new Set<string>();
     for (const action of binding.actions) {
       uniqueActions.add(action.name);
-      const existing = byAction.get(action.name) ?? [];
-      existing.push(binding);
-      byAction.set(action.name, existing);
+      if (!seenActions.has(action.name)) {
+        seenActions.add(action.name);
+        const existing = byAction.get(action.name) ?? [];
+        existing.push(binding);
+        byAction.set(action.name, existing);
+      }
     }
 
     // byMode
@@ -749,7 +753,9 @@ export function buildBindingIndex(
     } else {
       resolvedCount++;
     }
-    if (binding.actions.length > 1) {
+    // Count as multi-action only if there are genuinely different actions
+    const uniqueActionCount = new Set(binding.actions.map(a => a.name)).size;
+    if (uniqueActionCount > 1) {
       multiActionCount++;
     }
   }
