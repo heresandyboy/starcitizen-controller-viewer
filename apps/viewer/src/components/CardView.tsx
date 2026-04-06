@@ -3,7 +3,7 @@
 import { memo } from 'react';
 import type { SCDefaultAction } from '@/lib/types/defaultProfile';
 import type { InputType } from '@/lib/types/filters';
-import { localization } from '@/lib/data/sc-4.5/localization';
+import { localization } from '@/lib/data/sc-4.7/localization';
 
 // ---------------------------------------------------------------------------
 // Helpers

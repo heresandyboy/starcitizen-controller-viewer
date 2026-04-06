@@ -3,8 +3,8 @@
 import { useState, useMemo, useCallback } from 'react';
 import type { SCDefaultAction } from '@/lib/types/defaultProfile';
 import type { InputType } from '@/lib/types/filters';
-import { defaultActions, SC_VERSION } from '@/lib/data/sc-4.5/defaultActions';
-import { localization } from '@/lib/data/sc-4.5/localization';
+import { defaultActions, SC_VERSION } from '@/lib/data/sc-4.7/defaultActions';
+import { localization } from '@/lib/data/sc-4.7/localization';
 import { useFilterState } from '@/lib/hooks/useFilterState';
 import { filterActions, groupActionsByMap, getUniqueActionMaps } from '@/lib/filters/filterActions';
 import { FilterBar } from './FilterBar';
