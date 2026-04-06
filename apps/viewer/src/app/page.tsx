@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState, useCallback } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import type { GameActionState, GameplayMode } from '@/lib/types/unified';
 import type { BindingIndex } from '@/lib/types/binding';
 import { DefaultActionBrowser, GameActionUploader, LayerBrowser, ActionSearch, ModeCheatSheet, ControllerVisual } from '@/components';
@@ -19,6 +20,12 @@ const DEFAULT_XML = '/configs/layout_GCO-4-7-HOTAS.xml';
 const DEFAULT_REWASD = '/configs/GCO 4.7 HOTAS.rewasd';
 
 type ViewTab = 'actions' | 'layers' | 'search' | 'cheatsheet' | 'controller';
+
+const VIEW_TAB_IDS: ViewTab[] = ['actions', 'layers', 'search', 'cheatsheet', 'controller'];
+
+function isValidViewTab(value: string | null): value is ViewTab {
+  return value !== null && VIEW_TAB_IDS.includes(value as ViewTab);
+}
 
 interface LoadedData {
   actionState: GameActionState;
@@ -66,11 +73,40 @@ async function loadDefaultConfigs(): Promise<LoadedData> {
 }
 
 export default function Home() {
+  return (
+    <Suspense>
+      <HomeContent />
+    </Suspense>
+  );
+}
+
+function HomeContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
   const [customState, setCustomState] = useState<GameActionState | null>(null);
   const [bindingIndex, setBindingIndex] = useState<BindingIndex | null>(null);
   const [showUploader, setShowUploader] = useState(false);
   const [autoLoadError, setAutoLoadError] = useState<string | null>(null);
-  const [activeView, setActiveView] = useState<ViewTab>('actions');
+
+  // Initialize view from URL or default to 'actions'
+  const viewParam = searchParams.get('view');
+  const [activeView, setActiveViewState] = useState<ViewTab>(
+    isValidViewTab(viewParam) ? viewParam : 'actions'
+  );
+
+  // Update URL when view changes
+  const setActiveView = useCallback((view: ViewTab) => {
+    setActiveViewState(view);
+    const params = new URLSearchParams(searchParams.toString());
+    if (view === 'actions') {
+      params.delete('view');
+    } else {
+      params.set('view', view);
+    }
+    const qs = params.toString();
+    router.replace(qs ? `?${qs}` : '/', { scroll: false });
+  }, [searchParams, router]);
 
   useEffect(() => {
     loadDefaultConfigs()
@@ -81,12 +117,48 @@ export default function Home() {
       .catch((err) => setAutoLoadError(err instanceof Error ? err.message : String(err)));
   }, []);
 
-  const VIEW_TABS: { id: ViewTab; label: string; available: boolean }[] = [
-    { id: 'actions', label: 'Actions', available: true },
-    { id: 'layers', label: 'Layer Browser', available: bindingIndex !== null },
-    { id: 'search', label: 'Action Search', available: bindingIndex !== null },
-    { id: 'cheatsheet', label: 'Cheat Sheet', available: bindingIndex !== null },
-    { id: 'controller', label: 'Controller', available: bindingIndex !== null },
+  // Keyboard shortcuts: 1-5 switch views, Escape clears, / focuses search
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      // Don't capture when typing in an input/textarea
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') {
+        if (e.key === 'Escape') {
+          (e.target as HTMLElement).blur();
+        }
+        return;
+      }
+
+      // Number keys 1-5 switch views
+      if (e.key >= '1' && e.key <= '5') {
+        const index = parseInt(e.key) - 1;
+        const tab = VIEW_TABS[index];
+        if (tab?.available) {
+          e.preventDefault();
+          setActiveView(tab.id);
+        }
+        return;
+      }
+
+      // / focuses search input
+      if (e.key === '/') {
+        e.preventDefault();
+        const searchInput = document.querySelector<HTMLInputElement>('input[type="text"]');
+        searchInput?.focus();
+        return;
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [setActiveView]);
+
+  const VIEW_TABS: { id: ViewTab; label: string; available: boolean; shortcut: string }[] = [
+    { id: 'actions', label: 'Actions', available: true, shortcut: '1' },
+    { id: 'layers', label: 'Layer Browser', available: bindingIndex !== null, shortcut: '2' },
+    { id: 'search', label: 'Action Search', available: bindingIndex !== null, shortcut: '3' },
+    { id: 'cheatsheet', label: 'Cheat Sheet', available: bindingIndex !== null, shortcut: '4' },
+    { id: 'controller', label: 'Controller', available: bindingIndex !== null, shortcut: '5' },
   ];
 
   return (
@@ -140,8 +212,10 @@ export default function Home() {
                       ? 'border-transparent text-text-secondary hover:text-text hover:border-border'
                       : 'border-transparent text-text-muted cursor-not-allowed'
                 }`}
+                title={`${tab.label} (${tab.shortcut})`}
               >
                 {tab.label}
+                <span className="ml-1.5 text-xs opacity-40 hidden sm:inline">{tab.shortcut}</span>
               </button>
             ))}
           </div>
