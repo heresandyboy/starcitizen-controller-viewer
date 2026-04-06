@@ -1,6 +1,6 @@
 'use client';
 
-import type { ResolvedBinding, ActivatorType } from '@/lib/types/binding';
+import type { ResolvedBinding, ActivatorType, GameplayMode } from '@/lib/types/binding';
 import { ActivatorRow } from './ActivatorRow';
 
 interface ButtonGroupProps {
@@ -8,11 +8,12 @@ interface ButtonGroupProps {
   bindings: Map<ActivatorType, ResolvedBinding>;
   compactMode: boolean;
   showRawKeys: boolean;
+  modeFilter?: GameplayMode | 'All';
 }
 
 const ACTIVATOR_ORDER: ActivatorType[] = ['single', 'double', 'long', 'start', 'release'];
 
-export function ButtonGroup({ button, bindings, compactMode, showRawKeys }: ButtonGroupProps) {
+export function ButtonGroup({ button, bindings, compactMode, showRawKeys, modeFilter }: ButtonGroupProps) {
   const rows = compactMode
     ? ACTIVATOR_ORDER.filter(type => bindings.has(type))
     : ACTIVATOR_ORDER;
@@ -37,6 +38,7 @@ export function ButtonGroup({ button, bindings, compactMode, showRawKeys }: Butt
             binding={bindings.get(type)}
             activatorType={type}
             showRawKeys={showRawKeys}
+            modeFilter={modeFilter}
           />
         ))}
       </div>

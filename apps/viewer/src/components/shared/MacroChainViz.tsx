@@ -1,29 +1,33 @@
 'use client';
 
-import type { ResolvedBinding, MacroStepResolved } from '@/lib/types/binding';
+import type { ResolvedBinding, MacroStepResolved, GameplayMode } from '@/lib/types/binding';
 
 interface MacroChainVizProps {
   binding: ResolvedBinding;
   mode: 'compact' | 'expanded';
   showRawKeys?: boolean;
+  modeFilter?: GameplayMode | 'All';
 }
 
-export function MacroChainViz({ binding, mode, showRawKeys = false }: MacroChainVizProps) {
+export function MacroChainViz({ binding, mode, showRawKeys = false, modeFilter }: MacroChainVizProps) {
   if (mode === 'compact' || binding.macro.isSimple) {
-    return <CompactChain binding={binding} showRawKeys={showRawKeys} />;
+    return <CompactChain binding={binding} showRawKeys={showRawKeys} modeFilter={modeFilter} />;
   }
   return <ExpandedChain binding={binding} showRawKeys={showRawKeys} />;
 }
 
-function CompactChain({ binding, showRawKeys }: { binding: ResolvedBinding; showRawKeys: boolean }) {
+function CompactChain({ binding, showRawKeys, modeFilter }: { binding: ResolvedBinding; showRawKeys: boolean; modeFilter?: GameplayMode | 'All' }) {
   const keyLabel = binding.macro.keyboardKeysOutput.length > 0
     ? binding.macro.keyboardKeysOutput.join(' + ')
     : binding.macro.gamepadButtonsOutput.join(' + ');
 
-  // Deduplicate action names — turbo macros repeat the same action hundreds of times
+  // Filter by mode, then deduplicate — turbo macros repeat the same action hundreds of times
+  const filteredActions = modeFilter && modeFilter !== 'All'
+    ? binding.actions.filter(a => a.gameplayMode === modeFilter)
+    : binding.actions;
   const uniqueActionNames: string[] = [];
   const actionCounts = new Map<string, number>();
-  for (const a of binding.actions) {
+  for (const a of filteredActions) {
     actionCounts.set(a.displayName, (actionCounts.get(a.displayName) ?? 0) + 1);
     if (!uniqueActionNames.includes(a.displayName)) {
       uniqueActionNames.push(a.displayName);

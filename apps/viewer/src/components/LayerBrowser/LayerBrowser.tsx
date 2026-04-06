@@ -14,7 +14,7 @@ const ACTIVATOR_ORDER: ActivatorType[] = ['single', 'double', 'long', 'start', '
 export function LayerBrowser({ bindingIndex }: LayerBrowserProps) {
   const [selectedLayerId, setSelectedLayerId] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
-  const [modeFilter, setModeFilter] = useState<GameplayMode | 'All'>('All');
+  const [modeFilter, setModeFilter] = useState<GameplayMode | 'All'>('Flight');
   const [compactMode, setCompactMode] = useState(true);
   const [showRawKeys, setShowRawKeys] = useState(false);
 
@@ -224,6 +224,7 @@ export function LayerBrowser({ bindingIndex }: LayerBrowserProps) {
             bindings={buttonGroups.groups.get(button)!}
             compactMode={compactMode}
             showRawKeys={showRawKeys}
+            modeFilter={modeFilter}
           />
         ))}
       </div>

@@ -1,13 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import type { ResolvedBinding, ActivatorType } from '@/lib/types/binding';
+import type { ResolvedBinding, ActivatorType, GameplayMode } from '@/lib/types/binding';
 import { ActivatorBadge, MacroChainViz, GameplayModeBadge } from '@/components/shared';
 
 interface ActivatorRowProps {
   binding: ResolvedBinding | undefined;
   activatorType: ActivatorType;
   showRawKeys: boolean;
+  modeFilter?: GameplayMode | 'All';
 }
 
 const ACTIVATOR_LABELS: Record<ActivatorType, string> = {
@@ -18,7 +19,7 @@ const ACTIVATOR_LABELS: Record<ActivatorType, string> = {
   release: 'Release',
 };
 
-export function ActivatorRow({ binding, activatorType, showRawKeys }: ActivatorRowProps) {
+export function ActivatorRow({ binding, activatorType, showRawKeys, modeFilter }: ActivatorRowProps) {
   const [expanded, setExpanded] = useState(false);
 
   // Empty slot
@@ -31,7 +32,15 @@ export function ActivatorRow({ binding, activatorType, showRawKeys }: ActivatorR
     );
   }
 
-  const isMultiAction = binding.actions.length > 1;
+  // Filter actions by mode
+  const filteredActions = modeFilter && modeFilter !== 'All'
+    ? binding.actions.filter(a => a.gameplayMode === modeFilter)
+    : binding.actions;
+
+  // Hide row if no actions match the selected mode
+  if (filteredActions.length === 0) return null;
+
+  const isMultiAction = filteredActions.length > 1;
   const isUnresolved = binding.source === 'rewasd-unresolved';
   const isGamepad = binding.source === 'rewasd+xml-gamepad';
   const hasExpandableSteps = !binding.macro.isSimple && binding.macro.steps.length > 1;
@@ -45,8 +54,8 @@ export function ActivatorRow({ binding, activatorType, showRawKeys }: ActivatorR
         ? 'border-l-blue-500'
         : 'border-l-emerald-500';
 
-  // Gameplay modes for this binding's actions
-  const modes = [...new Set(binding.actions.map(a => a.gameplayMode))];
+  // Gameplay modes for filtered actions
+  const modes = [...new Set(filteredActions.map(a => a.gameplayMode))];
 
   return (
     <div className={`border-l-2 ${sourceColor} pl-2`}>
@@ -67,7 +76,7 @@ export function ActivatorRow({ binding, activatorType, showRawKeys }: ActivatorR
 
         {/* Macro chain (compact) */}
         <div className="flex-1 min-w-0">
-          <MacroChainViz binding={binding} mode="compact" showRawKeys={showRawKeys} />
+          <MacroChainViz binding={binding} mode="compact" showRawKeys={showRawKeys} modeFilter={modeFilter} />
         </div>
 
         {/* Gameplay mode badges */}
@@ -88,7 +97,7 @@ export function ActivatorRow({ binding, activatorType, showRawKeys }: ActivatorR
       {/* Expanded macro steps */}
       {expanded && hasExpandableSteps && (
         <div className="ml-18 py-2 px-2">
-          <MacroChainViz binding={binding} mode="expanded" showRawKeys={showRawKeys} />
+          <MacroChainViz binding={binding} mode="expanded" showRawKeys={showRawKeys} modeFilter={modeFilter} />
         </div>
       )}
     </div>

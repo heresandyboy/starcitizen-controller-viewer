@@ -17,6 +17,7 @@ export { FilterBar } from './FilterBar';
 export { CardView } from './CardView';
 export { LayerBrowser } from './LayerBrowser';
 export { ModeCheatSheet } from './ModeCheatSheet';
+export { ControllerVisual } from './ControllerVisual';
 
 // Shared v2 components
 export { MacroChainViz, LayerBadge, ActivatorBadge, GameplayModeBadge } from './shared';
