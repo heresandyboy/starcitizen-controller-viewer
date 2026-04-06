@@ -91,6 +91,7 @@ export interface ActivatorParams {
   expert?: boolean;
   delay?: number;
   singlewaittime?: number;
+  longwaittime?: number;
   doublewaittime?: number;
   pause?: number;
   macro?: boolean;
