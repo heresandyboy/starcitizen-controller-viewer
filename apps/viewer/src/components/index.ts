@@ -13,6 +13,9 @@ export { FilterBar } from './FilterBar';
 // Views
 export { CardView } from './CardView';
 
+// Shared v2 components
+export { MacroChainViz, LayerBadge, ActivatorBadge, GameplayModeBadge } from './shared';
+
 // Legacy components (reWASD-centric)
 export { ConfigUploader } from './ConfigUploader';
 export { ControllerInput } from './ControllerInput';
