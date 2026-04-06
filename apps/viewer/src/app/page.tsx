@@ -2,15 +2,30 @@
 
 import { useEffect, useState } from 'react';
 import type { GameActionState, GameplayMode } from '@/lib/types/unified';
-import { DefaultActionBrowser, GameActionUploader } from '@/components';
-import { parseXmlToGameActions, parseRewasdJson, addRewasdTriggersToActions } from '@/lib/parsers';
+import type { BindingIndex } from '@/lib/types/binding';
+import { DefaultActionBrowser, GameActionUploader, LayerBrowser } from '@/components';
+import {
+  parseXmlToGameActions,
+  parseRewasdJson,
+  addRewasdTriggersToActions,
+  parseStarCitizenXml,
+  parseRewasdJsonV2,
+  resolveBindingsV2,
+} from '@/lib/parsers';
 import { adaptGameActionsToSCDefaultActions } from '@/lib/adapters';
 import { ConfigSelector } from '@/components/ConfigSelector';
 
 const DEFAULT_XML = '/configs/layout_GCO-4-7-HOTAS.xml';
 const DEFAULT_REWASD = '/configs/GCO 4.7 HOTAS.rewasd';
 
-async function loadDefaultConfigs(): Promise<GameActionState> {
+type ViewTab = 'actions' | 'layers';
+
+interface LoadedData {
+  actionState: GameActionState;
+  bindingIndex: BindingIndex | null;
+}
+
+async function loadDefaultConfigs(): Promise<LoadedData> {
   const [xmlRes, rewasdRes] = await Promise.all([
     fetch(DEFAULT_XML),
     fetch(DEFAULT_REWASD),
@@ -21,6 +36,7 @@ async function loadDefaultConfigs(): Promise<GameActionState> {
 
   const [xmlText, rewasdText] = await Promise.all([xmlRes.text(), rewasdRes.text()]);
 
+  // V1 pipeline (existing action browser)
   const xmlResult = parseXmlToGameActions(xmlText);
   const rewasdResult = parseRewasdJson(rewasdText);
   const actions = addRewasdTriggersToActions(xmlResult.actions, rewasdResult);
@@ -28,25 +44,47 @@ async function loadDefaultConfigs(): Promise<GameActionState> {
   const categorySet = new Set<GameplayMode>();
   for (const action of actions) categorySet.add(action.category);
 
-  return {
+  const actionState: GameActionState = {
     loaded: true,
     xmlFileName: 'layout_GCO-4-7-HOTAS.xml',
     rewasdFileName: 'GCO 4.7 HOTAS.rewasd',
     actions,
     availableCategories: Array.from(categorySet).sort(),
   };
+
+  // V2 pipeline (layer browser + future views)
+  let bindingIndex: BindingIndex | null = null;
+  try {
+    const xmlParsed = parseStarCitizenXml(xmlText);
+    const rewasdV2 = parseRewasdJsonV2(rewasdText);
+    bindingIndex = resolveBindingsV2(rewasdV2, xmlParsed);
+  } catch (err) {
+    console.error('V2 pipeline failed, Layer Browser unavailable:', err);
+  }
+
+  return { actionState, bindingIndex };
 }
 
 export default function Home() {
   const [customState, setCustomState] = useState<GameActionState | null>(null);
+  const [bindingIndex, setBindingIndex] = useState<BindingIndex | null>(null);
   const [showUploader, setShowUploader] = useState(false);
   const [autoLoadError, setAutoLoadError] = useState<string | null>(null);
+  const [activeView, setActiveView] = useState<ViewTab>('actions');
 
   useEffect(() => {
     loadDefaultConfigs()
-      .then(setCustomState)
+      .then(({ actionState, bindingIndex: bi }) => {
+        setCustomState(actionState);
+        setBindingIndex(bi);
+      })
       .catch((err) => setAutoLoadError(err instanceof Error ? err.message : String(err)));
   }, []);
+
+  const VIEW_TABS: { id: ViewTab; label: string; available: boolean }[] = [
+    { id: 'actions', label: 'Actions', available: true },
+    { id: 'layers', label: 'Layer Browser', available: bindingIndex !== null },
+  ];
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -83,29 +121,61 @@ export default function Home() {
         </div>
       </header>
 
+      {/* View switcher tabs */}
+      <nav className="border-b border-border bg-surface">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="flex gap-1">
+            {VIEW_TABS.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => tab.available && setActiveView(tab.id)}
+                disabled={!tab.available}
+                className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+                  activeView === tab.id
+                    ? 'border-blue-500 text-text'
+                    : tab.available
+                      ? 'border-transparent text-text-secondary hover:text-text hover:border-border'
+                      : 'border-transparent text-text-muted cursor-not-allowed'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </nav>
+
       {/* Main content */}
       <main className="max-w-6xl mx-auto px-4 py-8">
-        {customState ? (
-          <DefaultActionBrowser
-            actions={adaptGameActionsToSCDefaultActions(customState.actions)}
-            title={customState.xmlFileName}
-          />
-        ) : showUploader ? (
-          <div className="max-w-md mx-auto">
-            <h2 className="text-lg font-medium text-text mb-4 text-center">
-              Load Your Config Files
-            </h2>
-            <GameActionUploader onStateLoaded={(state) => { setCustomState(state); setShowUploader(false); }} />
-          </div>
-        ) : (
+        {activeView === 'actions' && (
           <>
-            {autoLoadError && (
-              <div className="mb-4 p-3 rounded-lg bg-error-subtle text-error text-sm">
-                Could not auto-load default configs: {autoLoadError}
+            {customState ? (
+              <DefaultActionBrowser
+                actions={adaptGameActionsToSCDefaultActions(customState.actions)}
+                title={customState.xmlFileName}
+              />
+            ) : showUploader ? (
+              <div className="max-w-md mx-auto">
+                <h2 className="text-lg font-medium text-text mb-4 text-center">
+                  Load Your Config Files
+                </h2>
+                <GameActionUploader onStateLoaded={(state) => { setCustomState(state); setShowUploader(false); }} />
               </div>
+            ) : (
+              <>
+                {autoLoadError && (
+                  <div className="mb-4 p-3 rounded-lg bg-error-subtle text-error text-sm">
+                    Could not auto-load default configs: {autoLoadError}
+                  </div>
+                )}
+                <DefaultActionBrowser />
+              </>
             )}
-            <DefaultActionBrowser />
           </>
+        )}
+
+        {activeView === 'layers' && bindingIndex && (
+          <LayerBrowser bindingIndex={bindingIndex} />
         )}
       </main>
 

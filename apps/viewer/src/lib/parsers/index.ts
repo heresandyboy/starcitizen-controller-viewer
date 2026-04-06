@@ -9,6 +9,10 @@ export {
   buildKeyToButtonMap,
   formatMappingDescription,
   type ParseRewasdResult,
+  // V2
+  parseRewasdConfigV2,
+  parseRewasdJsonV2,
+  type ParseRewasdResultV2,
 } from './rewasdParser';
 
 // Star Citizen XML parser
@@ -42,6 +46,9 @@ export {
   addRewasdTriggersToActions,
   type ResolveResult,
   type ResolveStats,
+  // V2
+  resolveBindingsV2,
+  buildBindingIndex,
 } from './chainResolver';
 
 // Star Citizen defaultProfile.xml parser (game defaults)
