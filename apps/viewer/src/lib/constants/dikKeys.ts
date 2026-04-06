@@ -101,6 +101,9 @@ export const DIK_CODES: Record<number, string> = {
   82: 'Num0',
   83: 'NumDot',
 
+  // Escape
+  1: 'Esc',
+
   // Extended function keys
   87: 'F11',
   88: 'F12',
@@ -250,6 +253,12 @@ export const DIK_NAMES: Record<string, string> = {
   'DIK_PAUSE': 'Pause',
   'DIK_SYSRQ': 'PrintScreen',
   'DIK_APPS': 'Apps',
+
+  // Numpad operator aliases (reWASD uses these alternate names)
+  'DIK_ADD': 'NumPlus',
+  'DIK_SUBTRACT': 'NumMinus',
+  'DIK_MULTIPLY': 'NumMult',
+  'DIK_DIVIDE': 'NumDiv',
 };
 
 /**

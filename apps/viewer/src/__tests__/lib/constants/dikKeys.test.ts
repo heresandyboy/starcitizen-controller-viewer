@@ -215,10 +215,13 @@ describe('dikKeys', () => {
       expect(uniqueValues.size).toBe(values.length)
     })
 
-    it('DIK_NAMES has no duplicate values', () => {
-      const values = Object.values(DIK_NAMES)
-      const uniqueValues = new Set(values)
-      expect(uniqueValues.size).toBe(values.length)
+    it('DIK_NAMES aliases map to the same key name as canonical entries', () => {
+      // Some DIK names are aliases (e.g., DIK_ADD = DIK_NUMPADPLUS = 'NumPlus')
+      // Verify known aliases resolve to the expected values
+      expect(DIK_NAMES['DIK_ADD']).toBe(DIK_NAMES['DIK_NUMPADPLUS'])
+      expect(DIK_NAMES['DIK_SUBTRACT']).toBe(DIK_NAMES['DIK_NUMPADMINUS'])
+      expect(DIK_NAMES['DIK_MULTIPLY']).toBe(DIK_NAMES['DIK_NUMPADSTAR'])
+      expect(DIK_NAMES['DIK_DIVIDE']).toBe(DIK_NAMES['DIK_NUMPADSLASH'])
     })
 
     it('DIK_NAMES keys all start with DIK_', () => {
