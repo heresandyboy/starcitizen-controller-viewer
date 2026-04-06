@@ -41,6 +41,8 @@ export const REWASD_BUTTONS: Record<number, string> = {
   40: 'LSRight',
   41: 'LSUpLeft',
   42: 'LSUpRight',
+  43: 'LSDownLeft',
+  44: 'LSDownRight',
 
   // Triggers (as buttons)
   51: 'LT',
@@ -51,6 +53,10 @@ export const REWASD_BUTTONS: Record<number, string> = {
   114: 'RSDown',
   115: 'RSLeft',
   116: 'RSRight',
+  117: 'RSUpLeft',
+  118: 'RSUpRight',
+  119: 'RSDownLeft',
+  120: 'RSDownRight',
 };
 
 // Reverse lookup: button name to ID
@@ -91,6 +97,14 @@ export const BUTTON_DISPLAY_NAMES: Record<string, string> = {
   'RSDown': 'Right Stick Down',
   'RSLeft': 'Right Stick Left',
   'RSRight': 'Right Stick Right',
+  'LSUpLeft': 'Left Stick Up-Left',
+  'LSUpRight': 'Left Stick Up-Right',
+  'LSDownLeft': 'Left Stick Down-Left',
+  'LSDownRight': 'Left Stick Down-Right',
+  'RSUpLeft': 'Right Stick Up-Left',
+  'RSUpRight': 'Right Stick Up-Right',
+  'RSDownLeft': 'Right Stick Down-Left',
+  'RSDownRight': 'Right Stick Down-Right',
 };
 
 // Standard Gamepad API button indices (for browser Gamepad API)

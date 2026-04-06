@@ -1,6 +1,7 @@
 'use client';
 
 import type { ResolvedBinding } from '@/lib/types/binding';
+import { getButtonDisplayName } from '@/lib/constants/gamepadButtons';
 
 interface CheatSheetRowProps {
   binding: ResolvedBinding;
@@ -18,7 +19,7 @@ const ACTIVATOR_SHORT: Record<string, string> = {
 export function CheatSheetRow({ binding, actionDisplayName }: CheatSheetRowProps) {
   const layerPrefix = binding.layer.isDefault
     ? ''
-    : `[${binding.layer.triggerButton ?? binding.layer.name}] `;
+    : `[${binding.layer.triggerButton ? getButtonDisplayName(binding.layer.triggerButton) : binding.layer.name}] `;
 
   const activatorSuffix = ACTIVATOR_SHORT[binding.activator.type] ?? '';
 
@@ -28,7 +29,7 @@ export function CheatSheetRow({ binding, actionDisplayName }: CheatSheetRowProps
     <div className="flex items-center gap-2 py-1 px-2 text-sm hover:bg-zinc-800/30 rounded">
       {/* Button + activator */}
       <span className="w-48 shrink-0 text-zinc-300 font-mono text-xs">
-        {layerPrefix}{binding.button} {activatorSuffix}{turboLabel}
+        {layerPrefix}{getButtonDisplayName(binding.button)} {activatorSuffix}{turboLabel}
       </span>
 
       {/* Arrow */}

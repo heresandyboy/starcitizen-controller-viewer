@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import type { BindingIndex, ActivatorType, ResolvedBinding, GameplayMode } from '@/lib/types/binding';
 import { LayerBadge, ActivatorBadge, GameplayModeBadge } from '@/components/shared';
+import { getButtonDisplayName } from '@/lib/constants/gamepadButtons';
 
 interface ButtonDetailPanelProps {
   button: string;
@@ -56,7 +57,7 @@ export function ButtonDetailPanel({ button, bindingIndex, modeFilter, onClose }:
       {/* Header */}
       <div className="px-4 py-3 border-b border-zinc-800 flex items-center justify-between">
         <h3 className="text-sm font-semibold text-zinc-200">
-          {button} Button
+          {getButtonDisplayName(button)}
           {modeFilter !== 'All' && (
             <span className="text-zinc-500 font-normal"> — {modeFilter} Mode</span>
           )}
@@ -81,7 +82,7 @@ export function ButtonDetailPanel({ button, bindingIndex, modeFilter, onClose }:
                 <LayerBadge layer={layer} size="sm" />
                 {layer.triggerButton && (
                   <span className="text-xs text-zinc-500">
-                    Hold {layer.triggerButton}
+                    Hold {getButtonDisplayName(layer.triggerButton)}
                   </span>
                 )}
               </div>
@@ -140,7 +141,7 @@ export function ButtonDetailPanel({ button, bindingIndex, modeFilter, onClose }:
       {/* Empty state */}
       {layerBindings.length === 0 && (
         <div className="px-4 py-6 text-center text-zinc-500 text-sm">
-          No {modeFilter !== 'All' ? `${modeFilter} ` : ''}bindings for {button}
+          No {modeFilter !== 'All' ? `${modeFilter} ` : ''}bindings for {getButtonDisplayName(button)}
         </div>
       )}
     </div>

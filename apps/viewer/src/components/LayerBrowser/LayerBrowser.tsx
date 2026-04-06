@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback } from 'react';
 import type { BindingIndex, ActivatorType, ResolvedBinding, GameplayMode } from '@/lib/types/binding';
 import { LayerTabStrip } from './LayerTabStrip';
 import { ButtonGroup } from './ButtonGroup';
+import { getButtonDisplayName } from '@/lib/constants/gamepadButtons';
 
 interface LayerBrowserProps {
   bindingIndex: BindingIndex;
@@ -110,7 +111,7 @@ export function LayerBrowser({ bindingIndex }: LayerBrowserProps) {
       {/* Layer info */}
       {selectedLayer && selectedLayer.triggerButton && (
         <div className="text-xs text-zinc-500">
-          Activated by holding <span className="text-zinc-300 font-medium">{selectedLayer.triggerButton}</span>
+          Activated by holding <span className="text-zinc-300 font-medium">{getButtonDisplayName(selectedLayer.triggerButton)}</span>
           {selectedLayer.triggerType && ` (${selectedLayer.triggerType})`}
           {selectedLayer.parentLayerId !== undefined && (
             <span className="ml-2 text-zinc-600">

@@ -5,6 +5,7 @@ import type { BindingIndex, GameplayMode } from '@/lib/types/binding';
 import { useControllerState } from './useControllerState';
 import { ControllerSvg } from './ControllerSvg';
 import { ButtonDetailPanel } from './ButtonDetailPanel';
+import { getButtonDisplayName } from '@/lib/constants/gamepadButtons';
 
 interface ControllerVisualProps {
   bindingIndex: BindingIndex;
@@ -35,7 +36,7 @@ export function ControllerVisual({ bindingIndex }: ControllerVisualProps) {
             {state.activeLayer.name}
             {state.activeLayer.triggerButton && (
               <span className="text-zinc-500 ml-1">
-                (hold {state.activeLayer.triggerButton})
+                (hold {getButtonDisplayName(state.activeLayer.triggerButton)})
               </span>
             )}
           </span>

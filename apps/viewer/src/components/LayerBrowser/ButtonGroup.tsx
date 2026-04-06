@@ -2,6 +2,7 @@
 
 import type { ResolvedBinding, ActivatorType, GameplayMode } from '@/lib/types/binding';
 import { ActivatorRow } from './ActivatorRow';
+import { getButtonDisplayName } from '@/lib/constants/gamepadButtons';
 
 interface ButtonGroupProps {
   button: string;
@@ -24,7 +25,7 @@ export function ButtonGroup({ button, bindings, compactMode, showRawKeys, modeFi
     <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 overflow-hidden">
       {/* Button header */}
       <div className="px-3 py-2 bg-zinc-800/50 border-b border-zinc-800">
-        <span className="text-sm font-medium text-zinc-200">{button}</span>
+        <span className="text-sm font-medium text-zinc-200">{getButtonDisplayName(button)}</span>
         <span className="ml-2 text-xs text-zinc-500">
           {bindings.size} binding{bindings.size !== 1 ? 's' : ''}
         </span>
