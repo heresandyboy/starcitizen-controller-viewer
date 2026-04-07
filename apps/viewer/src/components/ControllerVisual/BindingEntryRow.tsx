@@ -29,16 +29,16 @@ export function BindingEntryRow({ entry, dimmed, highlighted }: BindingEntryRowP
   const modeText = ACTIVATOR_MODE_LABELS[activatorMode] || '';
   const activatorDisplay = [activatorText, modeText].filter(Boolean).join(' ');
 
-  // Primary action (first, or "No action" if unresolved)
+  // Use reWASD description if available, otherwise SC action display name
+  const rewasdDesc = entry.binding.description;
   const primaryAction = actions[0];
-  const actionName = primaryAction
-    ? primaryAction.displayName || primaryAction.name
-    : 'No action resolved';
+  const actionName = rewasdDesc
+    || (primaryAction ? primaryAction.displayName || primaryAction.name : 'Unresolved');
 
   const gameplayMode = primaryAction?.gameplayMode;
 
-  // Additional actions count
-  const extraCount = actions.length - 1;
+  // Show extra action count only when we don't have a human description
+  const extraCount = rewasdDesc ? 0 : Math.max(0, actions.length - 1);
 
   return (
     <div
