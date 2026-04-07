@@ -71,45 +71,32 @@ export function BindingEntryRow({ entry, dimmed, highlighted }: BindingEntryRowP
 
       {/* Gameplay mode */}
       {gameplayMode && gameplayMode !== 'Unknown' && (
-        <span className={`text-[10px] shrink-0 ${MODE_COLORS[gameplayMode] ?? 'text-zinc-500'}`}>
-          {MODE_ABBREV[gameplayMode] ?? gameplayMode}
+        <span className={`text-[10px] shrink-0 ${MODE_DISPLAY[gameplayMode]?.color ?? 'text-zinc-500'}`}>
+          {MODE_DISPLAY[gameplayMode]?.label ?? gameplayMode}
         </span>
       )}
     </div>
   );
 }
 
-/** Compact mode abbreviations matching the reference image */
-const MODE_ABBREV: Record<string, string> = {
-  General: 'Gen',
-  Flight: 'Flt',
-  FPS: 'FPS',
-  EVA: 'EVA',
-  Vehicle: 'Veh',
-  Mining: 'Min',
-  Salvage: 'Sal',
-  Scanning: 'Scn',
-  Turret: 'Tur',
-  Inventory: 'Inv',
-  Mobiglass: 'MB',
-  Camera: 'Cam',
-  Social: 'Soc',
-  Unknown: '',
-};
-
-/** Color per gameplay mode for the inline text */
-const MODE_COLORS: Record<string, string> = {
-  General: 'text-zinc-400',
-  Flight: 'text-sky-400',
-  FPS: 'text-red-400',
-  EVA: 'text-violet-400',
-  Vehicle: 'text-orange-400',
-  Mining: 'text-yellow-400',
-  Salvage: 'text-lime-400',
-  Scanning: 'text-cyan-400',
-  Turret: 'text-rose-400',
-  Inventory: 'text-emerald-400',
-  Mobiglass: 'text-blue-400',
-  Camera: 'text-indigo-400',
-  Social: 'text-pink-400',
+/**
+ * Star Citizen gameplay mode display names.
+ * Short labels that SC players will recognize.
+ * Reference image uses: FPS, TPS, EVA, MB, VT, IM, AM, SC, TB, R, M1
+ */
+export const MODE_DISPLAY: Record<string, { label: string; color: string }> = {
+  General:   { label: 'General',        color: 'text-zinc-400' },
+  Flight:    { label: 'Flight',         color: 'text-sky-400' },
+  FPS:       { label: 'On Foot',        color: 'text-red-400' },
+  EVA:       { label: 'EVA',            color: 'text-violet-400' },
+  Vehicle:   { label: 'Ground Vehicle', color: 'text-orange-400' },
+  Mining:    { label: 'Mining',         color: 'text-yellow-400' },
+  Salvage:   { label: 'Salvage',        color: 'text-lime-400' },
+  Scanning:  { label: 'Scanning',       color: 'text-cyan-400' },
+  Turret:    { label: 'Turret',         color: 'text-rose-400' },
+  Inventory: { label: 'Inventory',      color: 'text-emerald-400' },
+  Mobiglass: { label: 'mobiGlas',       color: 'text-blue-400' },
+  Camera:    { label: 'Camera',         color: 'text-indigo-400' },
+  Social:    { label: 'Social',         color: 'text-pink-400' },
+  Unknown:   { label: '',               color: 'text-zinc-500' },
 };

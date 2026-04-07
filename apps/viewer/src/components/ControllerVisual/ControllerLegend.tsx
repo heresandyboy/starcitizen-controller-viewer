@@ -2,16 +2,17 @@
 
 import type { ShiftLayer } from '@/lib/types/binding';
 import { LayerBadge } from '@/components/shared/LayerBadge';
+import { MODE_DISPLAY } from './BindingEntryRow';
 
 interface ControllerLegendProps {
   layers: ShiftLayer[];
 }
 
-/** Reference legend for the poster view: layer colors, activator types, mode abbreviations */
+/** Reference legend for the poster view */
 export function ControllerLegend({ layers }: ControllerLegendProps) {
   return (
     <div className="flex flex-wrap gap-6 text-xs text-zinc-400 bg-zinc-950/80 rounded-lg px-4 py-3 border border-zinc-800/60">
-      {/* Layers */}
+      {/* Shift Layers */}
       <div>
         <div className="text-zinc-500 font-semibold mb-1 uppercase tracking-wider text-[10px]">
           Shift Layers
@@ -23,7 +24,7 @@ export function ControllerLegend({ layers }: ControllerLegendProps) {
         </div>
       </div>
 
-      {/* Activation types */}
+      {/* Activation Types */}
       <div>
         <div className="text-zinc-500 font-semibold mb-1 uppercase tracking-wider text-[10px]">
           Activation
@@ -37,34 +38,29 @@ export function ControllerLegend({ layers }: ControllerLegendProps) {
         </div>
       </div>
 
-      {/* Activator modes */}
-      <div>
-        <div className="text-zinc-500 font-semibold mb-1 uppercase tracking-wider text-[10px]">
-          Modes
-        </div>
-        <div className="flex flex-wrap gap-x-3 gap-y-0.5">
-          <span><span className="text-zinc-300">[H]</span> = hold active</span>
-          <span><span className="text-zinc-300">[T]</span> = turbo/repeat</span>
-          <span><span className="text-zinc-300">[~]</span> = toggle</span>
-        </div>
-      </div>
-
-      {/* Gameplay mode colors */}
+      {/* Gameplay Modes */}
       <div>
         <div className="text-zinc-500 font-semibold mb-1 uppercase tracking-wider text-[10px]">
           Game Modes
         </div>
         <div className="flex flex-wrap gap-x-3 gap-y-0.5">
-          <span className="text-sky-400">Flt</span>
-          <span className="text-red-400">FPS</span>
-          <span className="text-violet-400">EVA</span>
-          <span className="text-orange-400">Veh</span>
-          <span className="text-yellow-400">Min</span>
-          <span className="text-cyan-400">Scn</span>
-          <span className="text-lime-400">Sal</span>
-          <span className="text-rose-400">Tur</span>
-          <span className="text-blue-400">MB</span>
-          <span className="text-zinc-400">Gen</span>
+          {Object.entries(MODE_DISPLAY)
+            .filter(([key]) => key !== 'Unknown')
+            .map(([key, { label, color }]) => (
+              <span key={key} className={color}>{label}</span>
+            ))}
+        </div>
+      </div>
+
+      {/* Activator Modes */}
+      <div>
+        <div className="text-zinc-500 font-semibold mb-1 uppercase tracking-wider text-[10px]">
+          Hold Modes
+        </div>
+        <div className="flex flex-wrap gap-x-3 gap-y-0.5">
+          <span><span className="text-zinc-300">[H]</span> = hold active</span>
+          <span><span className="text-zinc-300">[T]</span> = turbo/repeat</span>
+          <span><span className="text-zinc-300">[~]</span> = toggle</span>
         </div>
       </div>
     </div>
