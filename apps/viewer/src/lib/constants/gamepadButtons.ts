@@ -4,6 +4,8 @@
  */
 
 // reWASD button ID to button name
+// Derived from actual reWASD config mask→set→buttonId + description fields.
+// IDs verified against GCO 4.7 HOTAS.rewasd config data.
 export const REWASD_BUTTONS: Record<number, string> = {
   // Face buttons
   1: 'A',
@@ -34,29 +36,41 @@ export const REWASD_BUTTONS: Record<number, string> = {
   35: 'DpadLeft',
   36: 'DpadRight',
 
-  // Left Stick Zones (directional)
-  37: 'LSUp',
-  38: 'LSDown',
-  39: 'LSLeft',
-  40: 'LSRight',
-  41: 'LSUpLeft',
-  42: 'LSUpRight',
-  43: 'LSDownLeft',
-  44: 'LSDownRight',
+  // Left Stick Zones (radius-based deflection zones)
+  37: 'LSLowZone',
+  38: 'LSMedZone',
+  39: 'LSHighZone',
+
+  // Left Stick Directions
+  40: 'LSUp',
+  41: 'LSDown',
+  42: 'LSLeft',
+  43: 'LSRight',
+
+  // Right Stick Zones (radius-based deflection zones)
+  44: 'RSLowZone',
+  45: 'RSMedZone',
+  46: 'RSHighZone',
+
+  // Right Stick Directions
+  47: 'RSUp',
+  48: 'RSDown',
+  49: 'RSLeft',
+  50: 'RSRight',
 
   // Triggers (as buttons)
   51: 'LT',
-  52: 'RT',
+  55: 'RT',
 
-  // Right Stick Zones
-  113: 'RSUp',
-  114: 'RSDown',
-  115: 'RSLeft',
-  116: 'RSRight',
-  117: 'RSUpLeft',
-  118: 'RSUpRight',
-  119: 'RSDownLeft',
-  120: 'RSDownRight',
+  // Left Stick Directional Sub-Zones (zone + direction combos)
+  109: 'LSLowUp',
+  110: 'LSLowDown',
+  113: 'LSMedUp',
+  114: 'LSMedDown',
+  117: 'LSHighUp',
+  118: 'LSHighDown',
+  119: 'LSHighLeft',
+  120: 'LSHighRight',
 };
 
 // Reverse lookup: button name to ID
@@ -97,14 +111,22 @@ export const BUTTON_DISPLAY_NAMES: Record<string, string> = {
   'RSDown': 'Right Stick Down',
   'RSLeft': 'Right Stick Left',
   'RSRight': 'Right Stick Right',
-  'LSUpLeft': 'Left Stick Up-Left',
-  'LSUpRight': 'Left Stick Up-Right',
-  'LSDownLeft': 'Left Stick Down-Left',
-  'LSDownRight': 'Left Stick Down-Right',
-  'RSUpLeft': 'Right Stick Up-Left',
-  'RSUpRight': 'Right Stick Up-Right',
-  'RSDownLeft': 'Right Stick Down-Left',
-  'RSDownRight': 'Right Stick Down-Right',
+  // Stick deflection zones
+  'LSLowZone': 'Left Stick Low Zone',
+  'LSMedZone': 'Left Stick Mid Zone',
+  'LSHighZone': 'Left Stick High Zone',
+  'RSLowZone': 'Right Stick Low Zone',
+  'RSMedZone': 'Right Stick Mid Zone',
+  'RSHighZone': 'Right Stick High Zone',
+  // Directional sub-zones
+  'LSLowUp': 'Left Stick Low Up',
+  'LSLowDown': 'Left Stick Low Down',
+  'LSMedUp': 'Left Stick Mid Up',
+  'LSMedDown': 'Left Stick Mid Down',
+  'LSHighUp': 'Left Stick High Up',
+  'LSHighDown': 'Left Stick High Down',
+  'LSHighLeft': 'Left Stick High Left',
+  'LSHighRight': 'Left Stick High Right',
 };
 
 // Standard Gamepad API button indices (for browser Gamepad API)

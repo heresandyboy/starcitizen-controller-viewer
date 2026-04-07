@@ -45,31 +45,46 @@ describe('gamepadButtons', () => {
       expect(REWASD_BUTTONS[36]).toBe('DpadRight')
     })
 
-    it('maps left stick zones correctly', () => {
-      expect(REWASD_BUTTONS[37]).toBe('LSUp')
-      expect(REWASD_BUTTONS[38]).toBe('LSDown')
-      expect(REWASD_BUTTONS[39]).toBe('LSLeft')
-      expect(REWASD_BUTTONS[40]).toBe('LSRight')
-      expect(REWASD_BUTTONS[41]).toBe('LSUpLeft')
-      expect(REWASD_BUTTONS[42]).toBe('LSUpRight')
-      expect(REWASD_BUTTONS[43]).toBe('LSDownLeft')
-      expect(REWASD_BUTTONS[44]).toBe('LSDownRight')
+    it('maps left stick deflection zones correctly', () => {
+      expect(REWASD_BUTTONS[37]).toBe('LSLowZone')
+      expect(REWASD_BUTTONS[38]).toBe('LSMedZone')
+      expect(REWASD_BUTTONS[39]).toBe('LSHighZone')
+    })
+
+    it('maps left stick directions correctly', () => {
+      expect(REWASD_BUTTONS[40]).toBe('LSUp')
+      expect(REWASD_BUTTONS[41]).toBe('LSDown')
+      expect(REWASD_BUTTONS[42]).toBe('LSLeft')
+      expect(REWASD_BUTTONS[43]).toBe('LSRight')
+    })
+
+    it('maps right stick deflection zones correctly', () => {
+      expect(REWASD_BUTTONS[44]).toBe('RSLowZone')
+      expect(REWASD_BUTTONS[45]).toBe('RSMedZone')
+      expect(REWASD_BUTTONS[46]).toBe('RSHighZone')
+    })
+
+    it('maps right stick directions correctly', () => {
+      expect(REWASD_BUTTONS[47]).toBe('RSUp')
+      expect(REWASD_BUTTONS[48]).toBe('RSDown')
+      expect(REWASD_BUTTONS[49]).toBe('RSLeft')
+      expect(REWASD_BUTTONS[50]).toBe('RSRight')
     })
 
     it('maps triggers correctly', () => {
       expect(REWASD_BUTTONS[51]).toBe('LT')
-      expect(REWASD_BUTTONS[52]).toBe('RT')
+      expect(REWASD_BUTTONS[55]).toBe('RT')
     })
 
-    it('maps right stick zones correctly', () => {
-      expect(REWASD_BUTTONS[113]).toBe('RSUp')
-      expect(REWASD_BUTTONS[114]).toBe('RSDown')
-      expect(REWASD_BUTTONS[115]).toBe('RSLeft')
-      expect(REWASD_BUTTONS[116]).toBe('RSRight')
-      expect(REWASD_BUTTONS[117]).toBe('RSUpLeft')
-      expect(REWASD_BUTTONS[118]).toBe('RSUpRight')
-      expect(REWASD_BUTTONS[119]).toBe('RSDownLeft')
-      expect(REWASD_BUTTONS[120]).toBe('RSDownRight')
+    it('maps left stick directional sub-zones correctly', () => {
+      expect(REWASD_BUTTONS[109]).toBe('LSLowUp')
+      expect(REWASD_BUTTONS[110]).toBe('LSLowDown')
+      expect(REWASD_BUTTONS[113]).toBe('LSMedUp')
+      expect(REWASD_BUTTONS[114]).toBe('LSMedDown')
+      expect(REWASD_BUTTONS[117]).toBe('LSHighUp')
+      expect(REWASD_BUTTONS[118]).toBe('LSHighDown')
+      expect(REWASD_BUTTONS[119]).toBe('LSHighLeft')
+      expect(REWASD_BUTTONS[120]).toBe('LSHighRight')
     })
   })
 
@@ -85,6 +100,9 @@ describe('gamepadButtons', () => {
       expect(REWASD_BUTTON_IDS['LB']).toBe(5)
       expect(REWASD_BUTTON_IDS['DpadUp']).toBe(33)
       expect(REWASD_BUTTON_IDS['P1']).toBe(29)
+      expect(REWASD_BUTTON_IDS['RT']).toBe(55)
+      expect(REWASD_BUTTON_IDS['LSUp']).toBe(40)
+      expect(REWASD_BUTTON_IDS['RSUp']).toBe(47)
     })
 
     it('has the same number of entries as REWASD_BUTTONS', () => {
@@ -133,11 +151,15 @@ describe('gamepadButtons', () => {
       expect(BUTTON_DISPLAY_NAMES['RSDown']).toBe('Right Stick Down')
     })
 
-    it('provides display names for diagonal stick zones', () => {
-      expect(BUTTON_DISPLAY_NAMES['LSUpLeft']).toBe('Left Stick Up-Left')
-      expect(BUTTON_DISPLAY_NAMES['LSDownRight']).toBe('Left Stick Down-Right')
-      expect(BUTTON_DISPLAY_NAMES['RSUpLeft']).toBe('Right Stick Up-Left')
-      expect(BUTTON_DISPLAY_NAMES['RSDownLeft']).toBe('Right Stick Down-Left')
+    it('provides display names for stick deflection zones', () => {
+      expect(BUTTON_DISPLAY_NAMES['LSLowZone']).toBe('Left Stick Low Zone')
+      expect(BUTTON_DISPLAY_NAMES['LSHighZone']).toBe('Left Stick High Zone')
+      expect(BUTTON_DISPLAY_NAMES['RSMedZone']).toBe('Right Stick Mid Zone')
+    })
+
+    it('provides display names for directional sub-zones', () => {
+      expect(BUTTON_DISPLAY_NAMES['LSHighUp']).toBe('Left Stick High Up')
+      expect(BUTTON_DISPLAY_NAMES['LSHighRight']).toBe('Left Stick High Right')
     })
   })
 
@@ -182,6 +204,9 @@ describe('gamepadButtons', () => {
       expect(rewasdButtonToName(5)).toBe('LB')
       expect(rewasdButtonToName(33)).toBe('DpadUp')
       expect(rewasdButtonToName(51)).toBe('LT')
+      expect(rewasdButtonToName(55)).toBe('RT')
+      expect(rewasdButtonToName(40)).toBe('LSUp')
+      expect(rewasdButtonToName(47)).toBe('RSUp')
     })
 
     it('returns fallback for unknown IDs', () => {

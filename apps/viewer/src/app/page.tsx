@@ -12,12 +12,14 @@ import {
   parseStarCitizenXml,
   parseRewasdJsonV2,
   resolveBindingsV2,
+  parseDefaultProfile,
 } from '@/lib/parsers';
 import { adaptGameActionsToSCDefaultActions } from '@/lib/adapters';
 import { ConfigSelector } from '@/components/ConfigSelector';
 
 const DEFAULT_XML = '/configs/layout_GCO-4-7-HOTAS.xml';
 const DEFAULT_REWASD = '/configs/GCO 4.7 HOTAS.rewasd';
+const DEFAULT_PROFILE_XML = '/configs/sc-4.7/defaultProfile.xml';
 
 type ViewTab = 'actions' | 'layers' | 'search' | 'cheatsheet' | 'controller';
 
@@ -33,15 +35,20 @@ interface LoadedData {
 }
 
 async function loadDefaultConfigs(): Promise<LoadedData> {
-  const [xmlRes, rewasdRes] = await Promise.all([
+  const [xmlRes, rewasdRes, defaultProfileRes] = await Promise.all([
     fetch(DEFAULT_XML),
     fetch(DEFAULT_REWASD),
+    fetch(DEFAULT_PROFILE_XML),
   ]);
 
   if (!xmlRes.ok) throw new Error(`Failed to load XML: ${xmlRes.statusText}`);
   if (!rewasdRes.ok) throw new Error(`Failed to load reWASD: ${rewasdRes.statusText}`);
 
   const [xmlText, rewasdText] = await Promise.all([xmlRes.text(), rewasdRes.text()]);
+  const defaultProfileText = defaultProfileRes.ok ? await defaultProfileRes.text() : '';
+
+  // Parse SC defaults (fallback for keys not in custom XML)
+  const scDefaults = defaultProfileText ? parseDefaultProfile(defaultProfileText) : [];
 
   // V1 pipeline (existing action browser)
   const xmlResult = parseXmlToGameActions(xmlText);
@@ -64,7 +71,7 @@ async function loadDefaultConfigs(): Promise<LoadedData> {
   try {
     const xmlParsed = parseStarCitizenXml(xmlText);
     const rewasdV2 = parseRewasdJsonV2(rewasdText);
-    bindingIndex = resolveBindingsV2(rewasdV2, xmlParsed);
+    bindingIndex = resolveBindingsV2(rewasdV2, xmlParsed, scDefaults);
   } catch (err) {
     console.error('V2 pipeline failed, Layer Browser unavailable:', err);
   }
