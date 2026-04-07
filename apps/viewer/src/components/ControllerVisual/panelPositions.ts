@@ -21,11 +21,15 @@ export interface PanelPosition {
 }
 
 /** Canvas dimensions for the poster layout */
-export const CANVAS_WIDTH = 2600;
-export const CANVAS_HEIGHT = 1800;
+export const CANVAS_WIDTH = 2200;
+export const CANVAS_HEIGHT = 1500;
 
 /** Controller illustration center point (px within canvas) */
-export const CONTROLLER_CENTER = { x: 1300, y: 680 };
+export const CONTROLLER_CENTER = { x: 1100, y: 560 };
+
+/** Controller illustration size */
+export const CONTROLLER_WIDTH = 700;
+export const CONTROLLER_HEIGHT = Math.round(700 * (630 / 750));
 
 /** Controller SVG viewBox dimensions (the illustration uses these coordinates) */
 export const SVG_VIEWBOX = { width: 600, height: 400 };
@@ -46,226 +50,52 @@ export const PANEL_WIDTH = 300;
  * - Bottom: Paddles and stick clicks
  */
 export const PANEL_POSITIONS: Record<string, PanelPosition> = {
-  // === LEFT STICK DIRECTIONS (top-left quadrant) ===
-  LSUp: {
-    button: 'LSUp',
-    x: 20, y: 20,
-    anchor: 'right',
-    lineTarget: { x: 150, y: 108 },
-    group: 'stick-left',
-  },
-  LSDown: {
-    button: 'LSDown',
-    x: 20, y: 480,
-    anchor: 'right',
-    lineTarget: { x: 150, y: 148 },
-    group: 'stick-left',
-  },
-  LSLeft: {
-    button: 'LSLeft',
-    x: 20, y: 230,
-    anchor: 'right',
-    lineTarget: { x: 130, y: 128 },
-    group: 'stick-left',
-  },
-  LSRight: {
-    button: 'LSRight',
-    x: 420, y: 230,
-    anchor: 'left',
-    lineTarget: { x: 170, y: 128 },
-    group: 'stick-left',
-  },
+  // === LEFT STICK DIRECTIONS (top-left) ===
+  LSUp:    { button: 'LSUp',    x: 10,  y: 20,  anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'stick-left' },
+  LSDown:  { button: 'LSDown',  x: 10,  y: 380, anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'stick-left' },
+  LSLeft:  { button: 'LSLeft',  x: 10,  y: 190, anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'stick-left' },
+  LSRight: { button: 'LSRight', x: 370, y: 190, anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'stick-left' },
 
-  // === RIGHT STICK DIRECTIONS (top-right quadrant) ===
-  RSUp: {
-    button: 'RSUp',
-    x: 2290, y: 20,
-    anchor: 'left',
-    lineTarget: { x: 390, y: 240 },
-    group: 'stick-right',
-  },
-  RSDown: {
-    button: 'RSDown',
-    x: 2290, y: 480,
-    anchor: 'left',
-    lineTarget: { x: 390, y: 280 },
-    group: 'stick-right',
-  },
-  RSLeft: {
-    button: 'RSLeft',
-    x: 1970, y: 230,
-    anchor: 'right',
-    lineTarget: { x: 370, y: 260 },
-    group: 'stick-right',
-  },
-  RSRight: {
-    button: 'RSRight',
-    x: 2290, y: 230,
-    anchor: 'left',
-    lineTarget: { x: 410, y: 260 },
-    group: 'stick-right',
-  },
+  // === RIGHT STICK DIRECTIONS (top-right) ===
+  RSUp:    { button: 'RSUp',    x: 1900, y: 20,  anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'stick-right' },
+  RSDown:  { button: 'RSDown',  x: 1900, y: 380, anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'stick-right' },
+  RSLeft:  { button: 'RSLeft',  x: 1590, y: 190, anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'stick-right' },
+  RSRight: { button: 'RSRight', x: 1900, y: 190, anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'stick-right' },
 
-  // === D-PAD (left side, mid-height) ===
-  DpadUp: {
-    button: 'DpadUp',
-    x: 20, y: 720,
-    anchor: 'right',
-    lineTarget: { x: 180, y: 150 },
-    group: 'dpad',
-  },
-  DpadDown: {
-    button: 'DpadDown',
-    x: 20, y: 1120,
-    anchor: 'right',
-    lineTarget: { x: 180, y: 206 },
-    group: 'dpad',
-  },
-  DpadLeft: {
-    button: 'DpadLeft',
-    x: 20, y: 920,
-    anchor: 'right',
-    lineTarget: { x: 152, y: 178 },
-    group: 'dpad',
-  },
-  DpadRight: {
-    button: 'DpadRight',
-    x: 420, y: 920,
-    anchor: 'left',
-    lineTarget: { x: 208, y: 178 },
-    group: 'dpad',
-  },
+  // === D-PAD (left side) ===
+  DpadUp:    { button: 'DpadUp',    x: 10,  y: 560, anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'dpad' },
+  DpadDown:  { button: 'DpadDown',  x: 10,  y: 880, anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'dpad' },
+  DpadLeft:  { button: 'DpadLeft',  x: 10,  y: 720, anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'dpad' },
+  DpadRight: { button: 'DpadRight', x: 370, y: 720, anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'dpad' },
 
-  // === FACE BUTTONS (right side, mid-height) ===
-  Y: {
-    button: 'Y',
-    x: 2290, y: 720,
-    anchor: 'left',
-    lineTarget: { x: 430, y: 125 },
-    group: 'face',
-  },
-  X: {
-    button: 'X',
-    x: 1970, y: 920,
-    anchor: 'right',
-    lineTarget: { x: 398, y: 155 },
-    group: 'face',
-  },
-  B: {
-    button: 'B',
-    x: 2290, y: 920,
-    anchor: 'left',
-    lineTarget: { x: 462, y: 155 },
-    group: 'face',
-  },
-  A: {
-    button: 'A',
-    x: 2290, y: 1120,
-    anchor: 'left',
-    lineTarget: { x: 430, y: 185 },
-    group: 'face',
-  },
+  // === FACE BUTTONS (right side) ===
+  Y: { button: 'Y', x: 1900, y: 560, anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'face' },
+  X: { button: 'X', x: 1590, y: 720, anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'face' },
+  B: { button: 'B', x: 1900, y: 720, anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'face' },
+  A: { button: 'A', x: 1900, y: 880, anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'face' },
 
-  // === TRIGGERS (top, flanking center) ===
-  LT: {
-    button: 'LT',
-    x: 640, y: 20,
-    anchor: 'right',
-    lineTarget: { x: 150, y: 30 },
-    group: 'trigger',
-  },
-  RT: {
-    button: 'RT',
-    x: 1660, y: 20,
-    anchor: 'left',
-    lineTarget: { x: 450, y: 30 },
-    group: 'trigger',
-  },
+  // === TRIGGERS (top) ===
+  LT: { button: 'LT', x: 500,  y: 20,  anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'trigger' },
+  RT: { button: 'RT', x: 1400, y: 20,  anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'trigger' },
 
-  // === BUMPERS (above controller, flanking center) ===
-  LB: {
-    button: 'LB',
-    x: 640, y: 300,
-    anchor: 'right',
-    lineTarget: { x: 150, y: 62 },
-    group: 'bumper',
-  },
-  RB: {
-    button: 'RB',
-    x: 1660, y: 300,
-    anchor: 'left',
-    lineTarget: { x: 450, y: 62 },
-    group: 'bumper',
-  },
+  // === BUMPERS ===
+  LB: { button: 'LB', x: 500,  y: 250, anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'bumper' },
+  RB: { button: 'RB', x: 1400, y: 250, anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'bumper' },
 
-  // === SPECIAL BUTTONS (center area) ===
-  View: {
-    button: 'View',
-    x: 840, y: 560,
-    anchor: 'right',
-    lineTarget: { x: 260, y: 105 },
-    group: 'special',
-  },
-  Menu: {
-    button: 'Menu',
-    x: 1460, y: 560,
-    anchor: 'left',
-    lineTarget: { x: 340, y: 105 },
-    group: 'special',
-  },
-  Xbox: {
-    button: 'Xbox',
-    x: 1150, y: 400,
-    anchor: 'left',
-    lineTarget: { x: 300, y: 75 },
-    group: 'special',
-  },
+  // === SPECIAL BUTTONS ===
+  View: { button: 'View', x: 700,  y: 430, anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'special' },
+  Menu: { button: 'Menu', x: 1200, y: 430, anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'special' },
+  Xbox: { button: 'Xbox', x: 950,  y: 330, anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'special' },
 
-  // === STICK CLICKS (below special, above paddles) ===
-  LS: {
-    button: 'LS',
-    x: 840, y: 1200,
-    anchor: 'right',
-    lineTarget: { x: 150, y: 128 },
-    group: 'special',
-  },
-  RS: {
-    button: 'RS',
-    x: 1460, y: 1200,
-    anchor: 'left',
-    lineTarget: { x: 390, y: 260 },
-    group: 'special',
-  },
+  // === STICK CLICKS ===
+  LS: { button: 'LS', x: 700,  y: 1020, anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'special' },
+  RS: { button: 'RS', x: 1200, y: 1020, anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'special' },
 
-  // === PADDLES (bottom) ===
-  P1: {
-    button: 'P1',
-    x: 640, y: 1400,
-    anchor: 'right',
-    lineTarget: { x: 175, y: 320 },
-    group: 'paddle',
-  },
-  P3: {
-    button: 'P3',
-    x: 640, y: 1560,
-    anchor: 'right',
-    lineTarget: { x: 215, y: 350 },
-    group: 'paddle',
-  },
-  P2: {
-    button: 'P2',
-    x: 1660, y: 1400,
-    anchor: 'left',
-    lineTarget: { x: 425, y: 320 },
-    group: 'paddle',
-  },
-  P4: {
-    button: 'P4',
-    x: 1660, y: 1560,
-    anchor: 'left',
-    lineTarget: { x: 385, y: 350 },
-    group: 'paddle',
-  },
+  // === PADDLES ===
+  P1: { button: 'P1', x: 500,  y: 1150, anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'paddle' },
+  P3: { button: 'P3', x: 500,  y: 1300, anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'paddle' },
+  P2: { button: 'P2', x: 1400, y: 1150, anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'paddle' },
+  P4: { button: 'P4', x: 1400, y: 1300, anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'paddle' },
 };
 
 /** All button keys that have panel positions */
