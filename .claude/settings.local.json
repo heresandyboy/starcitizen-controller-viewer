@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx next:*)",
+      "Bash(npx playwright:*)",
+      "Bash(npx playwright-cli:*)",
+      "Bash(playwright-cli:*)",
+      "Bash(npx @playwright/cli:*)"
+    ]
+  }
+}

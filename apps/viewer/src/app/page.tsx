@@ -223,7 +223,7 @@ function HomeContent() {
       </nav>
 
       {/* Main content */}
-      <main className="max-w-6xl mx-auto px-4 py-8">
+      <main className={`mx-auto px-4 py-8 ${activeView === 'controller' ? 'max-w-full' : 'max-w-6xl'}`}>
         {activeView === 'actions' && (
           <>
             {customState ? (

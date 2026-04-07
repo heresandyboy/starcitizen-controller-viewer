@@ -1,144 +1,107 @@
 'use client';
 
-import { useMemo, useCallback, useState } from 'react';
-import type { BindingIndex, GameplayMode } from '@/lib/types/binding';
-import { useControllerState } from './useControllerState';
-import { ControllerSvg } from './ControllerSvg';
-import { ButtonDetailPanel } from './ButtonDetailPanel';
-import { getButtonDisplayName } from '@/lib/constants/gamepadButtons';
-import { useGamepad, isGamepadSupported } from '@/hooks/useGamepad';
+import { useState, useCallback } from 'react';
+import type { BindingIndex } from '@/lib/types/binding';
+import type { GameplayMode } from '@/lib/types/unified';
+import { useControllerVisualData } from './useControllerVisualData';
+import { ControllerCanvas } from './ControllerCanvas';
+import { ControllerLegend } from './ControllerLegend';
+import { useGamepad } from '@/hooks/useGamepad';
 import type { ButtonState } from '@/hooks/useGamepad';
 
 interface ControllerVisualProps {
   bindingIndex: BindingIndex;
 }
 
+/**
+ * "Reference Poster" controller view.
+ *
+ * Shows ALL buttons with ALL layer bindings visible simultaneously,
+ * spatially arranged around a central Xbox Elite controller illustration.
+ * Scrollable canvas with mode filter and search.
+ */
 export function ControllerVisual({ bindingIndex }: ControllerVisualProps) {
-  const [state, actions] = useControllerState(bindingIndex);
-  const [lastPhysicalButton, setLastPhysicalButton] = useState<string | null>(null);
+  const data = useControllerVisualData(bindingIndex);
+  const [highlightedButton, setHighlightedButton] = useState<string | null>(null);
 
-  // Physical controller input — select button when pressed
+  // Physical gamepad input → highlight the pressed button
   const handleButtonDown = useCallback((button: ButtonState) => {
-    setLastPhysicalButton(button.name);
+    setHighlightedButton(button.name);
+  }, []);
 
-    // If this button triggers a layer, toggle it
-    const layer = actions.getLayerForTriggerButton(button.name);
-    if (layer) {
-      actions.toggleLayer(layer.id);
-    }
-
-    // Select the button to show detail panel
-    actions.selectButton(button.name);
-  }, [actions]);
+  const handleButtonUp = useCallback(() => {
+    setHighlightedButton(null);
+  }, []);
 
   useGamepad({
     onButtonDown: handleButtonDown,
+    onButtonUp: handleButtonUp,
     trackAxes: false,
   });
 
-  // Available modes
-  const availableModes = useMemo(() => {
-    const modes = new Set<GameplayMode>();
-    for (const binding of bindingIndex.all) {
-      for (const action of binding.actions) {
-        modes.add(action.gameplayMode);
-      }
-    }
-    return Array.from(modes).sort();
-  }, [bindingIndex]);
-
   return (
-    <div className="space-y-4">
-      {/* Controls bar */}
+    <div className="space-y-3">
+      {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-4">
-        {/* Active layer indicator */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-zinc-400">Active Layer:</span>
-          <span className="text-sm font-medium text-zinc-200">
-            {state.activeLayer.name}
-            {state.activeLayer.triggerButton && (
-              <span className="text-zinc-500 ml-1">
-                (hold {getButtonDisplayName(state.activeLayer.triggerButton)})
-              </span>
-            )}
-          </span>
-          {state.activeLayerId !== 0 && (
-            <button
-              onClick={() => actions.setActiveLayer(0)}
-              className="text-xs text-zinc-500 hover:text-zinc-300 underline"
-            >
-              Reset to Main
-            </button>
-          )}
-        </div>
-
         {/* Mode filter */}
-        <div className="flex items-center gap-2 ml-auto">
-          <span className="text-sm text-zinc-400">Mode:</span>
+        <div className="flex items-center gap-2">
+          <label htmlFor="mode-filter" className="text-sm text-zinc-400">Mode:</label>
           <select
-            value={state.modeFilter}
-            onChange={(e) => actions.setModeFilter(e.target.value as GameplayMode | 'All')}
+            id="mode-filter"
+            value={data.modeFilter}
+            onChange={(e) => data.setModeFilter(e.target.value as GameplayMode | 'All')}
             className="px-3 py-1.5 text-sm rounded-lg border border-zinc-700 bg-zinc-900 text-zinc-100"
           >
             <option value="All">All Modes</option>
-            {availableModes.map(mode => (
+            {data.modes.map((mode) => (
               <option key={mode} value={mode}>{mode}</option>
             ))}
           </select>
         </div>
-      </div>
 
-      {/* Instruction */}
-      <p className="text-xs text-zinc-500">
-        Click a button or press it on your controller to see its bindings. Click LB, Y, Menu, etc. to switch shift layers.
-        {lastPhysicalButton && (
-          <span className="ml-2 text-blue-400">
-            Last pressed: {getButtonDisplayName(lastPhysicalButton)}
-          </span>
-        )}
-      </p>
-
-      {/* Main layout: SVG + detail panel */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        {/* Controller SVG */}
-        <div className="lg:col-span-3">
-          <ControllerSvg state={state} actions={actions} />
+        {/* Search */}
+        <div className="flex items-center gap-2 flex-1 max-w-sm">
+          <label htmlFor="poster-search" className="text-sm text-zinc-400">Search:</label>
+          <input
+            id="poster-search"
+            type="text"
+            placeholder="Filter actions..."
+            value={data.searchQuery}
+            onChange={(e) => data.setSearchQuery(e.target.value)}
+            className="flex-1 px-3 py-1.5 text-sm rounded-lg border border-zinc-700 bg-zinc-900 text-zinc-100 placeholder-zinc-600"
+          />
+          {data.searchQuery && (
+            <button
+              onClick={() => data.setSearchQuery('')}
+              className="text-xs text-zinc-500 hover:text-zinc-300"
+              aria-label="Clear search"
+            >
+              Clear
+            </button>
+          )}
         </div>
 
-        {/* Detail panel */}
-        <div className="lg:col-span-2">
-          {state.selectedButton ? (
-            <ButtonDetailPanel
-              button={state.selectedButton}
-              bindingIndex={bindingIndex}
-              modeFilter={state.modeFilter}
-              onClose={() => actions.selectButton(null)}
-            />
-          ) : (
-            <div className="border border-zinc-800 rounded-lg bg-zinc-900/50 px-4 py-12 text-center text-zinc-500">
-              <p className="text-sm">Click a button on the controller to see its bindings</p>
-              <p className="text-xs mt-2 text-zinc-600">
-                Buttons with bindings are brighter. Layer trigger buttons have an amber dot.
-              </p>
-            </div>
-          )}
+        {/* Stats */}
+        <div className="text-xs text-zinc-600 ml-auto">
+          {bindingIndex.stats.totalBindings} bindings across {data.layers.length} layers
         </div>
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap gap-4 text-xs text-zinc-500 pt-2 border-t border-zinc-800">
-        <span className="flex items-center gap-1">
-          <span className="w-3 h-3 rounded bg-zinc-600 border border-zinc-400 inline-block" /> Has bindings
-        </span>
-        <span className="flex items-center gap-1">
-          <span className="w-3 h-3 rounded bg-zinc-700 border border-zinc-500 opacity-60 inline-block" /> No bindings
-        </span>
-        <span className="flex items-center gap-1">
-          <span className="w-3 h-3 rounded bg-blue-700 border border-blue-400 inline-block" /> Active layer trigger
-        </span>
-        <span className="flex items-center gap-1">
-          <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" /> Layer trigger
-        </span>
+      <ControllerLegend layers={data.layers} />
+
+      {/* Scrollable canvas */}
+      <div
+        className="overflow-auto rounded-lg border border-zinc-800 bg-zinc-950"
+        style={{ maxHeight: 'calc(100vh - 280px)' }}
+      >
+        <ControllerCanvas
+          panels={data.panels}
+          modeFilter={data.modeFilter}
+          searchQuery={data.searchQuery}
+          highlightedButton={highlightedButton}
+          onHoverButton={setHighlightedButton}
+        />
       </div>
     </div>
   );
