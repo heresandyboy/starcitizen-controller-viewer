@@ -5,7 +5,12 @@
       "Bash(npx playwright:*)",
       "Bash(npx playwright-cli:*)",
       "Bash(playwright-cli:*)",
-      "Bash(npx @playwright/cli:*)"
+      "Bash(npx @playwright/cli:*)",
+      "Bash(bd sync:*)",
+      "Bash(bd update:*)"
     ]
+  },
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": true
   }
 }
