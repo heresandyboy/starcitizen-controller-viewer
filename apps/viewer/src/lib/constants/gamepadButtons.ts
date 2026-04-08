@@ -127,6 +127,14 @@ export const BUTTON_DISPLAY_NAMES: Record<string, string> = {
   'LSHighDown': 'Left Stick High Down',
   'LSHighLeft': 'Left Stick High Left',
   'LSHighRight': 'Left Stick High Right',
+  // Analog axes (virtual buttons for native SC axis bindings)
+  'LSX': 'Left Stick X-Axis',
+  'LSY': 'Left Stick Y-Axis',
+  'RSX': 'Right Stick X-Axis',
+  'RSY': 'Right Stick Y-Axis',
+  'LTAxis': 'Left Trigger Axis',
+  'RTAxis': 'Right Trigger Axis',
+  'LT+RT': 'Both Triggers',
 };
 
 // Standard Gamepad API button indices (for browser Gamepad API)

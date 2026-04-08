@@ -279,10 +279,12 @@ describe('gamepadButtons', () => {
       expect(uniqueValues.size).toBe(values.length)
     })
 
-    it('all BUTTON_DISPLAY_NAMES keys match reWASD or Gamepad API buttons', () => {
+    it('all BUTTON_DISPLAY_NAMES keys match reWASD, Gamepad API, or SC virtual buttons', () => {
       const rewasdButtons = new Set(Object.values(REWASD_BUTTONS))
       const gamepadButtons = new Set(Object.values(GAMEPAD_API_BUTTONS))
-      const allButtons = new Set([...rewasdButtons, ...gamepadButtons])
+      // Virtual button names for native SC gamepad axis/combo bindings
+      const scVirtualButtons = new Set(['LSX', 'LSY', 'RSX', 'RSY', 'LTAxis', 'RTAxis', 'LT+RT'])
+      const allButtons = new Set([...rewasdButtons, ...gamepadButtons, ...scVirtualButtons])
 
       for (const key of Object.keys(BUTTON_DISPLAY_NAMES)) {
         expect(allButtons.has(key)).toBe(true)

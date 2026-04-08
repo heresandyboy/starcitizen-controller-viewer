@@ -17,7 +17,7 @@ export interface PanelPosition {
   /** Where the leader line connects on the controller SVG (in SVG viewBox coords) */
   lineTarget: { x: number; y: number };
   /** Visual grouping for styling and layout */
-  group: 'stick-left' | 'stick-right' | 'dpad' | 'face' | 'bumper' | 'trigger' | 'special' | 'paddle';
+  group: 'stick-left' | 'stick-right' | 'dpad' | 'face' | 'bumper' | 'trigger' | 'special' | 'paddle' | 'axis';
 }
 
 /** Canvas dimensions for the poster layout */
@@ -96,6 +96,19 @@ export const PANEL_POSITIONS: Record<string, PanelPosition> = {
   P3: { button: 'P3', x: 500,  y: 1300, anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'paddle' },
   P2: { button: 'P2', x: 1400, y: 1150, anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'paddle' },
   P4: { button: 'P4', x: 1400, y: 1300, anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'paddle' },
+
+  // === ANALOG AXES (native SC gamepad bindings) ===
+  // Left Stick axes — below stick direction panels
+  LSX: { button: 'LSX', x: 10,  y: 510, anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'axis' },
+  LSY: { button: 'LSY', x: 370, y: 380, anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'axis' },
+  // Right Stick axes — below stick direction panels
+  RSX: { button: 'RSX', x: 1900, y: 510, anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'axis' },
+  RSY: { button: 'RSY', x: 1590, y: 380, anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'axis' },
+  // Trigger axes — next to trigger panels
+  LTAxis: { button: 'LTAxis', x: 500,  y: 140, anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'axis' },
+  RTAxis: { button: 'RTAxis', x: 1400, y: 140, anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'axis' },
+  // Both triggers combo
+  'LT+RT': { button: 'LT+RT', x: 950, y: 140, anchor: 'left', lineTarget: { x: 0, y: 0 }, group: 'axis' },
 };
 
 /** All button keys that have panel positions */

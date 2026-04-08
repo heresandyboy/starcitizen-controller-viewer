@@ -583,6 +583,7 @@ function findScGamepadKey(displayName: string): string | undefined {
 }
 
 import { REWASD_GP_OUTPUT_NAMES } from '../constants/keyMappings';
+import { SC_GAMEPAD_BUTTONS } from '../types/starcitizen';
 
 /**
  * Determine the BindingSource from resolution results.
@@ -597,6 +598,165 @@ function determineSource(
   if (resolvedVias.has('gamepad') && resolvedVias.has('keyboard')) return 'rewasd+xml';
   if (resolvedVias.has('gamepad')) return 'rewasd+xml-gamepad';
   return 'rewasd+xml';
+}
+
+/**
+ * Build a lookup map from SC gamepad key (e.g., "dpad_up", "shoulderl+a") to default actions.
+ * Keys are normalized to lowercase, matching the format in buildGamepadToActionMap.
+ */
+function buildDefaultGamepadMap(
+  defaults: SCDefaultAction[]
+): Map<string, SCDefaultAction[]> {
+  const map = new Map<string, SCDefaultAction[]>();
+  for (const action of defaults) {
+    if (!action.gamepadBind) continue;
+    const normalized = action.gamepadBind.toLowerCase();
+    const existing = map.get(normalized) ?? [];
+    existing.push(action);
+    map.set(normalized, existing);
+  }
+  return map;
+}
+
+/**
+ * Reverse lookup: SC gamepad input name → our button name.
+ * Handles simple keys (e.g., "dpad_up" → "DpadUp") and modifier combos
+ * (e.g., "shoulderl+x" → modifier "LB" + button "X").
+ */
+function scGamepadToButton(scKey: string): { button: string; modifier?: string } | null {
+  const lower = scKey.toLowerCase();
+
+  // Check for modifier combo (e.g., "shoulderl+a")
+  const plusIdx = lower.indexOf('+');
+  if (plusIdx >= 0) {
+    const modPart = lower.slice(0, plusIdx);
+    const keyPart = lower.slice(plusIdx + 1);
+    const modButton = SC_GAMEPAD_BUTTONS[modPart];
+    const keyButton = SC_GAMEPAD_BUTTONS[keyPart];
+    if (modButton && keyButton) {
+      return { button: keyButton, modifier: modButton };
+    }
+    // Unknown combo — skip
+    return null;
+  }
+
+  const button = SC_GAMEPAD_BUTTONS[lower];
+  return button ? { button } : null;
+}
+
+/**
+ * Create synthetic ResolvedBinding entries for native SC gamepad bindings
+ * that don't have reWASD overrides.
+ *
+ * For the Main layer, buttons without any reWASD mapping pass through to SC natively.
+ * This function looks up what SC does with those native gamepad inputs.
+ */
+function resolveNativeGamepadBindings(
+  gamepadToAction: Map<string, ParsedXmlBinding[]>,
+  defaultGamepadMap: Map<string, SCDefaultAction[]>,
+  mainLayer: ShiftLayer,
+  buttonsWithRewasdMain: Set<string>,
+): ResolvedBinding[] {
+  const nativeBindings: ResolvedBinding[] = [];
+  const processedButtons = new Set<string>();
+
+  // Collect all gamepad bindings from custom XML + defaults
+  // Merge keys from both maps (custom XML takes priority)
+  const allGamepadKeys = new Set<string>();
+  for (const key of gamepadToAction.keys()) allGamepadKeys.add(key);
+  for (const key of defaultGamepadMap.keys()) allGamepadKeys.add(key);
+
+  for (const scKey of allGamepadKeys) {
+    const mapped = scGamepadToButton(scKey);
+    if (!mapped) continue;
+
+    const { button, modifier } = mapped;
+
+    // For modifier combos (e.g., LB+X), check if the base button has reWASD
+    // bindings in the modifier's shift layer. If reWASD intercepts LB as a
+    // shift trigger, the SC modifier combo never fires — skip it.
+    if (modifier) {
+      // SC modifier combos are superseded by reWASD shift layers
+      // They only fire when the modifier button is NOT a reWASD shift trigger.
+      // For now, skip all modifier combos since our config uses LB as shift.
+      // TODO: Be smarter about which modifiers are shift triggers
+      continue;
+    }
+
+    // Skip buttons that already have reWASD bindings in Main layer
+    if (buttonsWithRewasdMain.has(button)) continue;
+
+    // Skip if we've already created a binding for this button
+    // (multiple SC bindings for same button get merged into one ResolvedBinding)
+    const bindingKey = button;
+    if (processedButtons.has(bindingKey)) {
+      // Add more actions to existing binding
+      continue;
+    }
+
+    // Gather all actions for this button from custom XML then defaults
+    const actions: ResolvedAction[] = [];
+    const xmlBindings = gamepadToAction.get(scKey);
+    const isFromDefault = !xmlBindings || xmlBindings.length === 0;
+
+    if (xmlBindings && xmlBindings.length > 0) {
+      for (const xml of xmlBindings) {
+        actions.push({
+          name: xml.actionName,
+          displayName: getActionDisplayName(xml.actionName),
+          actionMap: xml.actionMap,
+          gameplayMode: getGameplayMode(xml.actionMap),
+          macroStepIndex: 0,
+          resolvedVia: 'gamepad',
+          matchedInput: `gp1_${scKey}`,
+        });
+      }
+    } else {
+      const defaultActions = defaultGamepadMap.get(scKey);
+      if (defaultActions && defaultActions.length > 0) {
+        for (const def of defaultActions) {
+          actions.push({
+            name: def.actionName,
+            displayName: getActionDisplayName(def.actionName),
+            actionMap: def.mapName,
+            gameplayMode: getGameplayMode(def.mapName),
+            macroStepIndex: 0,
+            resolvedVia: 'gamepad',
+            matchedInput: `gp1_${scKey}`,
+          });
+        }
+      }
+    }
+
+    if (actions.length === 0) continue;
+
+    processedButtons.add(bindingKey);
+
+    const source: BindingSource = isFromDefault ? 'rewasd+default' : 'xml-gamepad';
+    const binding: ResolvedBinding = {
+      id: generateV2Id(button, mainLayer.id, 'single'),
+      button,
+      layer: mainLayer,
+      activator: {
+        type: 'single' as ActivatorType,
+        mode: 'onetime' as const,
+      },
+      macro: {
+        steps: [],
+        totalDurationMs: 0,
+        isSimple: true,
+        keyboardKeysOutput: [],
+        gamepadButtonsOutput: [button],
+      },
+      actions,
+      source,
+      description: `Native SC gamepad binding (no reWASD remap)`,
+    };
+
+    nativeBindings.push(binding);
+  }
+
+  return nativeBindings;
 }
 
 /**
@@ -616,6 +776,7 @@ export function resolveBindingsV2(
   const keyToAction = buildKeyToActionMap(xmlResult.bindings);
   const gamepadToAction = buildGamepadToActionMap(xmlResult.bindings);
   const defaultKeyboardMap = buildDefaultKeyboardMap(defaults);
+  const defaultGamepadMap = buildDefaultGamepadMap(defaults);
 
   const layers = rewasdResult.layers;
   const layerMap = new Map<number, ShiftLayer>();
@@ -626,6 +787,7 @@ export function resolveBindingsV2(
 
   const bindings: ResolvedBinding[] = [];
 
+  // Phase 1: Resolve all reWASD macro mappings
   for (const mapping of rewasdResult.mappings) {
     const layer = mapping.shiftId !== undefined
       ? layerMap.get(mapping.shiftId) ?? mainLayer
@@ -680,6 +842,18 @@ export function resolveBindingsV2(
 
     bindings.push(binding);
   }
+
+  // Phase 2: Add native SC gamepad bindings for buttons without reWASD mappings
+  // In the Main layer, unmapped buttons pass through natively to SC
+  const buttonsWithRewasdMain = new Set<string>();
+  for (const b of bindings) {
+    if (b.layer.id === 0) buttonsWithRewasdMain.add(b.button);
+  }
+
+  const nativeBindings = resolveNativeGamepadBindings(
+    gamepadToAction, defaultGamepadMap, mainLayer, buttonsWithRewasdMain
+  );
+  bindings.push(...nativeBindings);
 
   return buildBindingIndex(bindings, layers);
 }

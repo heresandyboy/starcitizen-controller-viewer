@@ -159,6 +159,11 @@ function getShortDisplayName(button: string): string {
     DpadLeft: 'D-Pad ←', DpadRight: 'D-Pad →',
     LSUp: 'LS ↑', LSDown: 'LS ↓', LSLeft: 'LS ←', LSRight: 'LS →',
     RSUp: 'RS ↑', RSDown: 'RS ↓', RSLeft: 'RS ←', RSRight: 'RS →',
+    // Analog axis virtual buttons
+    LSX: 'LS X-Axis', LSY: 'LS Y-Axis',
+    RSX: 'RS X-Axis', RSY: 'RS Y-Axis',
+    LTAxis: 'LT Axis', RTAxis: 'RT Axis',
+    'LT+RT': 'LT + RT',
   };
   return SHORT_NAMES[button] ?? button;
 }

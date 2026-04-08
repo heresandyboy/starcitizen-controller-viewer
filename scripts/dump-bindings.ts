@@ -146,7 +146,7 @@ async function main() {
   console.log(`Layers: ${bindingIndex.layers.map((l: any) => `${l.id}:${l.name}`).join(', ')}`);
   console.log();
 
-  // All buttons in the order we display them
+  // All buttons in the order we display them (including axis virtual buttons)
   const PANEL_BUTTONS = [
     'LSUp', 'LSDown', 'LSLeft', 'LSRight',
     'RSUp', 'RSDown', 'RSLeft', 'RSRight',
@@ -156,6 +156,8 @@ async function main() {
     'View', 'Menu', 'Xbox',
     'LS', 'RS',
     'P1', 'P2', 'P3', 'P4',
+    // Analog axes (native SC gamepad bindings)
+    'LSX', 'LSY', 'RSX', 'RSY', 'LTAxis', 'RTAxis', 'LT+RT',
   ];
 
   for (const button of PANEL_BUTTONS) {

@@ -167,6 +167,7 @@ export const SC_GAMEPAD_BUTTONS: Record<string, string> = {
   'shoulderr': 'RB',
   'triggerl_btn': 'LT',
   'triggerr_btn': 'RT',
+  'triggerl_r_btn': 'LT+RT',
   'thumbl': 'LS',
   'thumbr': 'RS',
   'back': 'View',
@@ -175,4 +176,20 @@ export const SC_GAMEPAD_BUTTONS: Record<string, string> = {
   'dpad_down': 'DpadDown',
   'dpad_left': 'DpadLeft',
   'dpad_right': 'DpadRight',
+  // Stick directional zones (used in SC bindings like thumbl_up)
+  'thumbl_up': 'LSUp',
+  'thumbl_down': 'LSDown',
+  'thumbl_left': 'LSLeft',
+  'thumbl_right': 'LSRight',
+  'thumbr_up': 'RSUp',
+  'thumbr_down': 'RSDown',
+  'thumbr_left': 'RSLeft',
+  'thumbr_right': 'RSRight',
+  // Analog axes (mapped to virtual axis buttons for display)
+  'thumblx': 'LSX',
+  'thumbly': 'LSY',
+  'thumbrx': 'RSX',
+  'thumbry': 'RSY',
+  'triggerl': 'LTAxis',
+  'triggerr': 'RTAxis',
 };
