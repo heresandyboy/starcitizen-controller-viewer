@@ -230,7 +230,7 @@ function HomeContent() {
       </nav>
 
       {/* Main content */}
-      <main className={`mx-auto px-4 py-8 ${activeView === 'controller' ? 'max-w-full' : 'max-w-6xl'}`}>
+      <main className={`mx-auto py-8 ${activeView === 'controller' ? 'max-w-full px-2' : 'max-w-6xl px-4'}`}>
         {activeView === 'actions' && (
           <>
             {customState ? (

@@ -55,7 +55,7 @@ export function BindingEntryRow({ entry, dimmed, highlighted }: BindingEntryRowP
       )}
 
       {/* Action name */}
-      <span className="truncate text-[11px] flex-1 min-w-0">
+      <span className="truncate text-[10px] flex-1 min-w-0">
         {actionName}
         {extraCount > 0 && (
           <span className="text-zinc-500 ml-0.5">+{extraCount}</span>
@@ -64,14 +64,14 @@ export function BindingEntryRow({ entry, dimmed, highlighted }: BindingEntryRowP
 
       {/* Activator type (if not single tap) */}
       {activatorDisplay && (
-        <span className="text-[10px] text-zinc-500 shrink-0">
+        <span className="text-[9px] text-zinc-500 shrink-0">
           {activatorDisplay}
         </span>
       )}
 
       {/* Gameplay mode */}
       {gameplayMode && gameplayMode !== 'Unknown' && (
-        <span className={`text-[10px] shrink-0 ${MODE_DISPLAY[gameplayMode]?.color ?? 'text-zinc-500'}`}>
+        <span className={`text-[9px] shrink-0 ${MODE_DISPLAY[gameplayMode]?.color ?? 'text-zinc-500'}`}>
           {MODE_DISPLAY[gameplayMode]?.label ?? gameplayMode}
         </span>
       )}

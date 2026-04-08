@@ -38,7 +38,6 @@ export function ControllerCanvas({
       style={{
         width: CANVAS_WIDTH,
         height: CANVAS_HEIGHT,
-        contain: 'layout paint',
       }}
     >
       {/* Leader lines SVG (behind everything) */}

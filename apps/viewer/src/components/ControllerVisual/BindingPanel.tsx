@@ -66,7 +66,7 @@ export function BindingPanel({
       {/* Header */}
       <div
         className={`
-          px-2 py-1 text-xs font-semibold border-b border-zinc-800/50
+          px-1.5 py-0.5 text-xs font-semibold border-b border-zinc-800/50
           ${hasBindings ? 'text-zinc-200' : 'text-zinc-600'}
           ${position.anchor === 'right' ? 'text-right' : 'text-left'}
         `}
@@ -79,7 +79,7 @@ export function BindingPanel({
 
       {/* Binding entries */}
       {!isCollapsed && entries.length > 0 && (
-        <div className="px-1.5 py-0.5 max-h-48 overflow-y-auto [scrollbar-width:thin]">
+        <div className="px-1.5 py-0.5 max-h-36 overflow-y-auto [scrollbar-width:thin]">
           {entryStates.map(({ entry, matchesMode, matchesSearch }, i) => (
             <BindingEntryRow
               key={entry.binding.id ?? i}
