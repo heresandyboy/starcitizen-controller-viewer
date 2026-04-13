@@ -750,7 +750,7 @@ function resolveNativeGamepadBindings(
       },
       actions,
       source,
-      description: `Native SC gamepad binding (no reWASD remap)`,
+      description: undefined,
     };
 
     nativeBindings.push(binding);

@@ -52,7 +52,7 @@ function applyCustomDescriptions(
 ): void {
   for (const binding of index.all) {
     const desc = sidecar.descriptions[binding.id];
-    if (desc) {
+    if (desc && !desc.startsWith('TODO:') && !desc.startsWith('Native SC gamepad')) {
       binding.customDescription = desc;
     }
   }

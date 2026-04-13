@@ -2,7 +2,9 @@ import { describe, it, expect } from 'vitest'
 import {
   SC_CONTEXT_GROUPS,
   ACTION_MAP_TO_CONTEXT,
+  CONTEXT_GROUP_SETS,
   getContextLabel,
+  getContextGroupSet,
 } from '@/lib/constants/scContextGroups'
 import { ACTION_MAP_MODES } from '@/lib/constants/scActions'
 
@@ -81,6 +83,29 @@ describe('scContextGroups', () => {
     it('returns undefined for unknown action maps', () => {
       expect(getContextLabel('debug')).toBeUndefined()
       expect(getContextLabel('nonexistent')).toBeUndefined()
+    })
+  })
+
+  describe('CONTEXT_GROUP_SETS', () => {
+    it('has a Set for every context group', () => {
+      for (const key of Object.keys(SC_CONTEXT_GROUPS)) {
+        expect(CONTEXT_GROUP_SETS[key]).toBeInstanceOf(Set)
+      }
+    })
+
+    it('Set contents match actionMaps arrays', () => {
+      for (const [key, group] of Object.entries(SC_CONTEXT_GROUPS)) {
+        const set = CONTEXT_GROUP_SETS[key]
+        expect(set.size).toBe(group.actionMaps.length)
+        for (const am of group.actionMaps) {
+          expect(set.has(am)).toBe(true)
+        }
+      }
+    })
+
+    it('getContextGroupSet returns correct set', () => {
+      expect(getContextGroupSet('piloting')).toBe(CONTEXT_GROUP_SETS['piloting'])
+      expect(getContextGroupSet('nonexistent')).toBeUndefined()
     })
   })
 })

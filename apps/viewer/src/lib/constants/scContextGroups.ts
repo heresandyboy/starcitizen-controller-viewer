@@ -130,6 +130,18 @@ export const SC_CONTEXT_GROUPS: Record<string, ScContextGroup> = {
   },
 };
 
+/** Context group key type — keys of SC_CONTEXT_GROUPS */
+export type ContextGroupKey = keyof typeof SC_CONTEXT_GROUPS;
+
+/** All valid context group keys */
+export const CONTEXT_GROUP_KEYS = Object.keys(SC_CONTEXT_GROUPS) as ContextGroupKey[];
+
+/** Pre-computed Set<string> of action maps per context group (avoids creating Sets per render). */
+export const CONTEXT_GROUP_SETS: Record<string, Set<string>> = {};
+for (const [groupKey, group] of Object.entries(SC_CONTEXT_GROUPS)) {
+  CONTEXT_GROUP_SETS[groupKey] = new Set(group.actionMaps);
+}
+
 /**
  * Reverse lookup: given an action map name, return its context group key.
  * Returns undefined for unmapped action maps (debug, IFCS_controls, etc.).
@@ -148,4 +160,12 @@ for (const [groupKey, group] of Object.entries(SC_CONTEXT_GROUPS)) {
 export function getContextLabel(actionMapName: string): string | undefined {
   const groupKey = ACTION_MAP_TO_CONTEXT[actionMapName];
   return groupKey ? SC_CONTEXT_GROUPS[groupKey]?.label : undefined;
+}
+
+/**
+ * Get the precomputed Set for a context group key.
+ * Returns undefined if the key isn't a valid context group.
+ */
+export function getContextGroupSet(key: string): Set<string> | undefined {
+  return CONTEXT_GROUP_SETS[key];
 }

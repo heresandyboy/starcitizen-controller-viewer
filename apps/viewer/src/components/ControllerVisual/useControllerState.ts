@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import type { BindingIndex, ResolvedBinding, ShiftLayer, ActivatorType, GameplayMode } from '@/lib/types/binding';
-import { SC_CONTEXT_GROUPS } from '@/lib/constants/scContextGroups';
+import { CONTEXT_GROUP_SETS } from '@/lib/constants/scContextGroups';
 
 export interface ControllerState {
   activeLayerId: number;
@@ -71,9 +71,8 @@ export function useControllerState(bindingIndex: BindingIndex): [ControllerState
 
     // If mode filter is active, find a matching action
     if (modeFilter !== 'All') {
-      const contextGroup = SC_CONTEXT_GROUPS[modeFilter as keyof typeof SC_CONTEXT_GROUPS];
-      if (contextGroup) {
-        const groupMaps = new Set(contextGroup.actionMaps);
+      const groupMaps = CONTEXT_GROUP_SETS[modeFilter];
+      if (groupMaps) {
         const modeAction = binding.actions.find(a => groupMaps.has(a.actionMap));
         if (modeAction) return modeAction.displayName;
       } else {

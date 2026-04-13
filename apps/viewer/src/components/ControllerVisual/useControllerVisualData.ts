@@ -8,7 +8,7 @@ import type {
   ShiftLayer,
 } from '@/lib/types/binding';
 import type { GameplayMode } from '@/lib/types/unified';
-import { SC_CONTEXT_GROUPS } from '@/lib/constants/scContextGroups';
+import { SC_CONTEXT_GROUPS, CONTEXT_GROUP_SETS } from '@/lib/constants/scContextGroups';
 import type { ActivatorType } from '@/lib/types/rewasd';
 import { PANEL_BUTTONS } from './panelPositions';
 
@@ -197,10 +197,8 @@ export function entryMatchesMode(
 ): boolean {
   if (mode === 'All') return true;
   // Check if it's a context group key
-  const contextGroup = SC_CONTEXT_GROUPS[mode as keyof typeof SC_CONTEXT_GROUPS];
-  if (contextGroup) {
-    // Match if any action's actionMap is in this context group
-    const groupMaps = new Set(contextGroup.actionMaps);
+  const groupMaps = CONTEXT_GROUP_SETS[mode];
+  if (groupMaps) {
     return entry.actions.some((a) => groupMaps.has(a.actionMap));
   }
   // Otherwise, match by gameplay mode directly
