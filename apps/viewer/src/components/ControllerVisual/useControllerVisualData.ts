@@ -8,7 +8,7 @@ import type {
   ShiftLayer,
 } from '@/lib/types/binding';
 import type { GameplayMode } from '@/lib/types/unified';
-import { SC_CONTEXT_GROUPS, CONTEXT_GROUP_SETS } from '@/lib/constants/scContextGroups';
+import { SC_CONTEXT_GROUPS, CONTEXT_GROUP_SETS, ALWAYS_ACTION_MAPS } from '@/lib/constants/scContextGroups';
 import type { ActivatorType } from '@/lib/types/rewasd';
 import { PANEL_BUTTONS } from './panelPositions';
 
@@ -196,11 +196,28 @@ export function entryMatchesMode(
   mode: GameplayMode | 'All'
 ): boolean {
   if (mode === 'All') return true;
-  // Check if it's a context group key
   const groupMaps = CONTEXT_GROUP_SETS[mode];
   if (groupMaps) {
-    return entry.actions.some((a) => groupMaps.has(a.actionMap));
+    return entry.actions.some((a) => groupMaps.has(a.actionMap) || ALWAYS_ACTION_MAPS.has(a.actionMap));
   }
-  // Otherwise, match by gameplay mode directly
   return entry.actions.some((a) => a.gameplayMode === mode);
+}
+
+/**
+ * Filter an entry's actions to only those relevant to the selected mode.
+ * "Always" actions (mobiGlas, seat_general, etc.) are included in every mode.
+ * Returns the filtered action list, or all actions if mode is 'All'.
+ */
+export function filterActionsForMode(
+  actions: ResolvedAction[],
+  mode: GameplayMode | 'All'
+): ResolvedAction[] {
+  if (mode === 'All') return actions;
+
+  const groupMaps = CONTEXT_GROUP_SETS[mode];
+  if (groupMaps) {
+    return actions.filter((a) => groupMaps.has(a.actionMap) || ALWAYS_ACTION_MAPS.has(a.actionMap));
+  }
+  // Individual mode: match by gameplayMode, plus always-group actions
+  return actions.filter((a) => a.gameplayMode === mode || ALWAYS_ACTION_MAPS.has(a.actionMap));
 }

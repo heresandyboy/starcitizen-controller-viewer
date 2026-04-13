@@ -10,7 +10,7 @@
  */
 
 export interface ScContextGroup {
-  /** Display label for the context (e.g., "Piloting") */
+  /** Display label for the context (e.g., "Flight") */
   label: string;
   /** Action maps active in this context */
   actionMaps: string[];
@@ -23,8 +23,8 @@ export interface ScContextGroup {
  * "Always" actions are shown in every context.
  */
 export const SC_CONTEXT_GROUPS: Record<string, ScContextGroup> = {
-  piloting: {
-    label: 'Piloting',
+  flight: {
+    label: 'Flight',
     actionMaps: [
       'spaceship_general',
       'spaceship_movement',
@@ -169,3 +169,6 @@ export function getContextLabel(actionMapName: string): string | undefined {
 export function getContextGroupSet(key: string): Set<string> | undefined {
   return CONTEXT_GROUP_SETS[key];
 }
+
+/** Pre-computed Set of "always" action maps — shown regardless of mode filter. */
+export const ALWAYS_ACTION_MAPS: Set<string> = CONTEXT_GROUP_SETS['always'] ?? new Set();

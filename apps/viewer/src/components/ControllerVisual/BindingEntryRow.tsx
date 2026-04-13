@@ -8,8 +8,8 @@ import type { ResolvedAction, MacroSequence } from '@/lib/types/binding';
 
 interface BindingEntryRowProps {
   entry: BindingEntry;
-  /** Dim this row (filtered out by search/mode) */
-  dimmed?: boolean;
+  /** Mode-filtered actions to display (subset of entry.actions). */
+  filteredActions?: ResolvedAction[];
   /** Highlight this row (search match) */
   highlighted?: boolean;
 }
@@ -20,8 +20,10 @@ interface BindingEntryRowProps {
  * Collapsed: [LayerBadge] Action Name (+N) (activator) [mode badges]
  * Expanded:  Shows all actions, each with its own mode badge.
  */
-export function BindingEntryRow({ entry, dimmed, highlighted }: BindingEntryRowProps) {
-  const { layer, activatorType, activatorMode, actions } = entry;
+export function BindingEntryRow({ entry, filteredActions, highlighted }: BindingEntryRowProps) {
+  const { layer, activatorType, activatorMode } = entry;
+  // Use filtered actions if provided (mode filtering), otherwise all actions
+  const actions = filteredActions ?? entry.actions;
   const isMainLayer = layer.isDefault;
   const [expanded, setExpanded] = useState(false);
 
@@ -57,7 +59,6 @@ export function BindingEntryRow({ entry, dimmed, highlighted }: BindingEntryRowP
 
   const baseClasses = `
     leading-tight min-w-0
-    ${dimmed ? 'opacity-25' : ''}
     ${highlighted ? 'text-amber-200' : 'text-zinc-300'}
   `;
 

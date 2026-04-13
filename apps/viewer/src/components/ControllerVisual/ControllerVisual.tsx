@@ -56,16 +56,9 @@ export function ControllerVisual({ bindingIndex }: ControllerVisualProps) {
           aria-label="Filter by gameplay mode"
         >
           <option value="All">All Modes</option>
-          <optgroup label="Game State">
-            {Object.entries(SC_CONTEXT_GROUPS).map(([key, group]) => (
-              <option key={key} value={key}>{group.label}</option>
-            ))}
-          </optgroup>
-          <optgroup label="Individual Mode">
-            {data.modes.map((mode) => (
-              <option key={mode} value={mode}>{mode}</option>
-            ))}
-          </optgroup>
+          {Object.entries(SC_CONTEXT_GROUPS).map(([key, group]) => (
+            <option key={key} value={key}>{group.label}</option>
+          ))}
         </select>
 
         {/* Search */}

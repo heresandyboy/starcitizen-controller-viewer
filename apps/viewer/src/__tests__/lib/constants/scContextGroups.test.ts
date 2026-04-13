@@ -11,7 +11,7 @@ import { ACTION_MAP_MODES } from '@/lib/constants/scActions'
 describe('scContextGroups', () => {
   describe('SC_CONTEXT_GROUPS', () => {
     it('has all expected context groups', () => {
-      expect(SC_CONTEXT_GROUPS.piloting).toBeDefined()
+      expect(SC_CONTEXT_GROUPS.flight).toBeDefined()
       expect(SC_CONTEXT_GROUPS.onFoot).toBeDefined()
       expect(SC_CONTEXT_GROUPS.vehicle).toBeDefined()
       expect(SC_CONTEXT_GROUPS.turret).toBeDefined()
@@ -32,8 +32,8 @@ describe('scContextGroups', () => {
       expect(allActionMaps.length).toBe(unique.size)
     })
 
-    it('piloting group contains core spaceship maps', () => {
-      const maps = SC_CONTEXT_GROUPS.piloting.actionMaps
+    it('flight group contains core spaceship maps', () => {
+      const maps = SC_CONTEXT_GROUPS.flight.actionMaps
       expect(maps).toContain('spaceship_movement')
       expect(maps).toContain('spaceship_weapons')
       expect(maps).toContain('spaceship_quantum')
@@ -47,8 +47,8 @@ describe('scContextGroups', () => {
   })
 
   describe('ACTION_MAP_TO_CONTEXT', () => {
-    it('maps spaceship_movement to piloting', () => {
-      expect(ACTION_MAP_TO_CONTEXT['spaceship_movement']).toBe('piloting')
+    it('maps spaceship_movement to flight', () => {
+      expect(ACTION_MAP_TO_CONTEXT['spaceship_movement']).toBe('flight')
     })
 
     it('maps player to onFoot', () => {
@@ -74,7 +74,7 @@ describe('scContextGroups', () => {
 
   describe('getContextLabel', () => {
     it('returns label for known action maps', () => {
-      expect(getContextLabel('spaceship_weapons')).toBe('Piloting')
+      expect(getContextLabel('spaceship_weapons')).toBe('Flight')
       expect(getContextLabel('player')).toBe('On Foot')
       expect(getContextLabel('zero_gravity_eva')).toBe('EVA')
       expect(getContextLabel('default')).toBe('Always')
@@ -104,7 +104,7 @@ describe('scContextGroups', () => {
     })
 
     it('getContextGroupSet returns correct set', () => {
-      expect(getContextGroupSet('piloting')).toBe(CONTEXT_GROUP_SETS['piloting'])
+      expect(getContextGroupSet('flight')).toBe(CONTEXT_GROUP_SETS['flight'])
       expect(getContextGroupSet('nonexistent')).toBeUndefined()
     })
   })

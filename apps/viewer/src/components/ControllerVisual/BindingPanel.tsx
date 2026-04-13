@@ -5,7 +5,7 @@ import type { ComputedPosition } from './useForceLayout';
 import { BindingEntryRow } from './BindingEntryRow';
 import {
   entryMatchesSearch,
-  entryMatchesMode,
+  filterActionsForMode,
 } from './useControllerVisualData';
 import type { GameplayMode } from '@/lib/types/unified';
 
@@ -20,6 +20,10 @@ interface BindingPanelProps {
 /**
  * A spatially positioned panel showing all bindings for one button
  * across all layers. Positioned by force layout within the canvas.
+ *
+ * Mode filtering: shows only actions relevant to the selected mode
+ * within each entry. Entries with zero matching actions are hidden.
+ * "Always" actions (mobiGlas, etc.) persist in every mode.
  */
 export function BindingPanel({
   panelData,
@@ -30,19 +34,19 @@ export function BindingPanel({
 }: BindingPanelProps) {
   const { displayName, entries, hasBindings } = panelData;
 
-  // Determine which entries match filters
-  const entryStates = entries.map((entry) => ({
-    entry,
-    matchesMode: entryMatchesMode(entry, modeFilter),
-    matchesSearch: entryMatchesSearch(entry, searchQuery),
-  }));
-
-  const hasVisibleEntries = entryStates.some(
-    (s) => s.matchesMode && s.matchesSearch
-  );
+  // Filter actions per entry for the selected mode, then check search
+  const visibleEntries = entries
+    .map((entry) => {
+      const filteredActions = filterActionsForMode(entry.actions, modeFilter);
+      const matchesSearch = entryMatchesSearch(entry, searchQuery);
+      return { entry, filteredActions, matchesSearch };
+    })
+    .filter(({ filteredActions, matchesSearch }) =>
+      filteredActions.length > 0 && matchesSearch
+    );
 
   // Collapse panel if no entries or all filtered out
-  const isCollapsed = !hasBindings || (searchQuery && !hasVisibleEntries) || (modeFilter !== 'All' && !hasVisibleEntries);
+  const isCollapsed = !hasBindings || visibleEntries.length === 0;
 
   return (
     <div
@@ -64,24 +68,27 @@ export function BindingPanel({
       <div
         className={`
           px-1.5 py-0.5 text-xs font-semibold border-b border-zinc-800/50
-          ${hasBindings ? 'text-zinc-200' : 'text-zinc-600'}
+          ${hasBindings && !isCollapsed ? 'text-zinc-200' : 'text-zinc-600'}
         `}
       >
         {displayName}
+        {isCollapsed && hasBindings && (
+          <span className="text-zinc-600 font-normal ml-1">—</span>
+        )}
         {!hasBindings && (
           <span className="text-zinc-600 font-normal ml-1">—</span>
         )}
       </div>
 
-      {/* Binding entries — no max-height cap, force layout provides room */}
-      {!isCollapsed && entries.length > 0 && (
+      {/* Binding entries — filtered to mode-relevant actions only */}
+      {!isCollapsed && (
         <div className="px-1.5 py-0.5 overflow-y-auto [scrollbar-width:thin]">
-          {entryStates.map(({ entry, matchesMode, matchesSearch }, i) => (
+          {visibleEntries.map(({ entry, filteredActions }, i) => (
             <BindingEntryRow
               key={entry.binding.id ?? i}
               entry={entry}
-              dimmed={!matchesMode || !matchesSearch}
-              highlighted={searchQuery.length > 0 && matchesSearch && matchesMode}
+              filteredActions={filteredActions}
+              highlighted={searchQuery.length > 0}
             />
           ))}
         </div>

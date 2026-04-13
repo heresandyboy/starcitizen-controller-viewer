@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import type { BindingIndex, ResolvedBinding, ShiftLayer, ActivatorType, GameplayMode } from '@/lib/types/binding';
-import { CONTEXT_GROUP_SETS } from '@/lib/constants/scContextGroups';
+import { CONTEXT_GROUP_SETS, ALWAYS_ACTION_MAPS } from '@/lib/constants/scContextGroups';
 
 export interface ControllerState {
   activeLayerId: number;
@@ -69,14 +69,14 @@ export function useControllerState(bindingIndex: BindingIndex): [ControllerState
 
     if (!binding || binding.actions.length === 0) return null;
 
-    // If mode filter is active, find a matching action
+    // If mode filter is active, find a matching action (mode-specific or "always")
     if (modeFilter !== 'All') {
       const groupMaps = CONTEXT_GROUP_SETS[modeFilter];
       if (groupMaps) {
-        const modeAction = binding.actions.find(a => groupMaps.has(a.actionMap));
+        const modeAction = binding.actions.find(a => groupMaps.has(a.actionMap) || ALWAYS_ACTION_MAPS.has(a.actionMap));
         if (modeAction) return modeAction.displayName;
       } else {
-        const modeAction = binding.actions.find(a => a.gameplayMode === modeFilter);
+        const modeAction = binding.actions.find(a => a.gameplayMode === modeFilter || ALWAYS_ACTION_MAPS.has(a.actionMap));
         if (modeAction) return modeAction.displayName;
       }
     }

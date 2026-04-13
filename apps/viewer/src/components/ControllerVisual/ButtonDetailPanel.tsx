@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import type { BindingIndex, ActivatorType, ResolvedBinding, GameplayMode } from '@/lib/types/binding';
 import { LayerBadge, ActivatorBadge, GameplayModeBadge } from '@/components/shared';
 import { getButtonDisplayName } from '@/lib/constants/gamepadButtons';
-import { CONTEXT_GROUP_SETS } from '@/lib/constants/scContextGroups';
+import { CONTEXT_GROUP_SETS, ALWAYS_ACTION_MAPS } from '@/lib/constants/scContextGroups';
 
 interface ButtonDetailPanelProps {
   button: string;
@@ -42,11 +42,11 @@ export function ButtonDetailPanel({ button, bindingIndex, modeFilter, onClose }:
 
         for (const binding of activatorMap.values()) {
           if (groupMaps) {
-            if (binding.actions.some(a => groupMaps.has(a.actionMap))) {
+            if (binding.actions.some(a => groupMaps.has(a.actionMap) || ALWAYS_ACTION_MAPS.has(a.actionMap))) {
               hasMatchingActions = true;
               break;
             }
-          } else if (binding.actions.some(a => a.gameplayMode === modeFilter)) {
+          } else if (binding.actions.some(a => a.gameplayMode === modeFilter || ALWAYS_ACTION_MAPS.has(a.actionMap))) {
             hasMatchingActions = true;
             break;
           }
@@ -106,9 +106,9 @@ export function ButtonDetailPanel({ button, bindingIndex, modeFilter, onClose }:
                   if (modeFilter !== 'All') {
                     const maps = CONTEXT_GROUP_SETS[modeFilter];
                     if (maps) {
-                      actions = binding.actions.filter(a => maps.has(a.actionMap));
+                      actions = binding.actions.filter(a => maps.has(a.actionMap) || ALWAYS_ACTION_MAPS.has(a.actionMap));
                     } else {
-                      actions = binding.actions.filter(a => a.gameplayMode === modeFilter);
+                      actions = binding.actions.filter(a => a.gameplayMode === modeFilter || ALWAYS_ACTION_MAPS.has(a.actionMap));
                     }
                   }
 
