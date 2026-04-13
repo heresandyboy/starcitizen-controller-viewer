@@ -520,61 +520,70 @@ export const SC_ACTION_NAMES: Record<string, string> = {
 };
 
 export const ACTION_MAP_MODES: Record<string, GameplayMode> = {
-  // General
-  'seat_general': 'General',
+  // General / Always active
   'default': 'General',
-  'player_general': 'General',
-  'player_emotes': 'Social',
+  'seat_general': 'General',
+  'player_choice': 'General',
   'player_input_optical_tracking': 'General',
+  'lights_controller': 'General',
+  'ui_textfield': 'General',
+  'ui_notification': 'General',
+  'mapui': 'General',
+  'character_customizer': 'General',
 
-  // Spaceship
+  // Spaceship / Flight
   'spaceship_general': 'Flight',
-  'spaceship_view': 'Camera',
   'spaceship_movement': 'Flight',
+  'spaceship_view': 'Camera',
   'spaceship_quantum': 'Flight',
   'spaceship_targeting': 'Flight',
+  'spaceship_targeting_advanced': 'Flight',
   'spaceship_target_hailing': 'Flight',
   'spaceship_weapons': 'Flight',
+  'spaceship_auto_weapons': 'Flight',
   'spaceship_missiles': 'Flight',
   'spaceship_defensive': 'Flight',
   'spaceship_power': 'Flight',
-  'spaceship_shields': 'Flight',
   'spaceship_radar': 'Flight',
   'spaceship_hud': 'Flight',
+  'spaceship_docking': 'Flight',
 
-  // Specialized modes
+  // Specialized flight sub-modes
   'spaceship_mining': 'Mining',
   'spaceship_salvage': 'Salvage',
   'spaceship_scanning': 'Scanning',
-  'spaceship_tractor_beam': 'General',
+
+  // Vehicle cockpit
+  'vehicle_mfd': 'Flight',
+  'vehicle_mobiglas': 'Mobiglass',
 
   // Turret
-  'turret_main': 'Turret',
   'turret_movement': 'Turret',
   'turret_advanced': 'Turret',
 
-  // Vehicle
+  // Ground vehicle
   'vehicle_general': 'Vehicle',
   'vehicle_driver': 'Vehicle',
 
-  // FPS
-  'fps_movement': 'FPS',
-  'fps_view': 'FPS',
-  'fps_combat': 'FPS',
-  'fps_weapons': 'FPS',
-  'fps_interaction': 'FPS',
-  'fps_ineraction': 'FPS', // Typo in SC
-  'fps_inerraction': 'FPS', // Another typo
+  // FPS / On foot
+  'player': 'FPS',
+  'prone': 'FPS',
+  'tractor_beam': 'General',
+  'incapacitated': 'FPS',
+  'hacking': 'FPS',
+  'player_emotes': 'Social',
+
+  // FPS hand mining
+  'mining': 'Mining',
 
   // EVA
-  'eva_movement': 'EVA',
-  'eva': 'EVA',
-
-  // UI / Inventory
-  'ui_textfield': 'General',
-  'ui_notification': 'General',
-  'inventory': 'Inventory',
   'zero_gravity_eva': 'EVA',
+  'zero_gravity_traversal': 'EVA',
+
+  // Camera
+  'view_director_mode': 'Camera',
+  'flycam': 'Camera',
+  'spectator': 'Camera',
 };
 
 /**

@@ -820,7 +820,20 @@ export function resolveBindingsV2(
       allActions.push(...result.actions);
     }
 
-    const source = determineSource(resolvedVias, usedDefault, allActions.length > 0);
+    // Deduplicate actions by (actionName, actionMap) — turbo/loop macros repeat the same key
+    const dedupMap = new Map<string, ResolvedAction & { repeatCount: number }>();
+    for (const action of allActions) {
+      const key = `${action.actionMap}::${action.name}`;
+      const existing = dedupMap.get(key);
+      if (existing) {
+        existing.repeatCount++;
+      } else {
+        dedupMap.set(key, { ...action, repeatCount: 1 });
+      }
+    }
+    const dedupedActions = [...dedupMap.values()];
+
+    const source = determineSource(resolvedVias, usedDefault, dedupedActions.length > 0);
 
     const binding: ResolvedBinding = {
       id: generateV2Id(mapping.buttonName, layer.id, mapping.activator.type),
@@ -835,7 +848,7 @@ export function resolveBindingsV2(
         ...mapping.macro,
         steps: resolvedSteps,
       },
-      actions: allActions,
+      actions: dedupedActions,
       source,
       description: mapping.description,
     };

@@ -262,4 +262,45 @@ describe('chainResolver V2', () => {
       expect(index.byLayer.get(0)).toHaveLength(2)
     })
   })
+
+  describe('action deduplication', () => {
+    const rewasdConfig = loadGcoFixture()
+    const xmlString = loadGcoXml()
+
+    if (!rewasdConfig || !xmlString) {
+      it.skip('GCO fixtures not available', () => {})
+      return
+    }
+
+    const rewasdResult = parseRewasdConfigV2(rewasdConfig)
+    const xmlResult = parseStarCitizenXml(xmlString)
+    const defaults = loadDefaultActions()
+    const index = resolveBindingsV2(rewasdResult, xmlResult, defaults)
+
+    it('deduplicates repeated actions from turbo/loop macros', () => {
+      // No binding should have duplicate (actionName, actionMap) pairs
+      for (const binding of index.all) {
+        const seen = new Set<string>()
+        for (const action of binding.actions) {
+          const key = `${action.actionMap}::${action.name}`
+          expect(seen.has(key)).toBe(false)
+          seen.add(key)
+        }
+      }
+    })
+
+    it('sets repeatCount > 1 for turbo/loop actions', () => {
+      // At least some bindings should have turbo repeats
+      const turboActions = index.all.flatMap(b =>
+        b.actions.filter(a => a.repeatCount !== undefined && a.repeatCount > 1)
+      )
+      expect(turboActions.length).toBeGreaterThan(0)
+    })
+
+    it('keeps action count reasonable (no 100+ actions per binding)', () => {
+      for (const binding of index.all) {
+        expect(binding.actions.length).toBeLessThan(100)
+      }
+    })
+  })
 })

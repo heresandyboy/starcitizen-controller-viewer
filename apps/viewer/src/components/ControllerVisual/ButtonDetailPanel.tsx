@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import type { BindingIndex, ActivatorType, ResolvedBinding, GameplayMode } from '@/lib/types/binding';
 import { LayerBadge, ActivatorBadge, GameplayModeBadge } from '@/components/shared';
 import { getButtonDisplayName } from '@/lib/constants/gamepadButtons';
+import { SC_CONTEXT_GROUPS } from '@/lib/constants/scContextGroups';
 
 interface ButtonDetailPanelProps {
   button: string;
@@ -34,11 +35,19 @@ export function ButtonDetailPanel({ button, bindingIndex, modeFilter, onClose }:
       const activatorMap = buttonMap.get(layer.id);
       if (!activatorMap || activatorMap.size === 0) continue;
 
-      // If mode filter is active, check if any activator has actions in this mode
+      // If mode filter is active, check if any activator has actions in this mode/context
       if (modeFilter !== 'All') {
         let hasMatchingActions = false;
+        const contextGroup = SC_CONTEXT_GROUPS[modeFilter as keyof typeof SC_CONTEXT_GROUPS];
+        const groupMaps = contextGroup ? new Set(contextGroup.actionMaps) : null;
+
         for (const binding of activatorMap.values()) {
-          if (binding.actions.some(a => a.gameplayMode === modeFilter)) {
+          if (groupMaps) {
+            if (binding.actions.some(a => groupMaps.has(a.actionMap))) {
+              hasMatchingActions = true;
+              break;
+            }
+          } else if (binding.actions.some(a => a.gameplayMode === modeFilter)) {
             hasMatchingActions = true;
             break;
           }
@@ -93,10 +102,17 @@ export function ButtonDetailPanel({ button, bindingIndex, modeFilter, onClose }:
                   const binding = bindings.get(activatorType);
                   if (!binding) return null;
 
-                  // Filter actions by mode
-                  const actions = modeFilter !== 'All'
-                    ? binding.actions.filter(a => a.gameplayMode === modeFilter)
-                    : binding.actions;
+                  // Filter actions by mode or context group
+                  let actions = binding.actions;
+                  if (modeFilter !== 'All') {
+                    const cg = SC_CONTEXT_GROUPS[modeFilter as keyof typeof SC_CONTEXT_GROUPS];
+                    if (cg) {
+                      const maps = new Set(cg.actionMaps);
+                      actions = binding.actions.filter(a => maps.has(a.actionMap));
+                    } else {
+                      actions = binding.actions.filter(a => a.gameplayMode === modeFilter);
+                    }
+                  }
 
                   // Hide row if no actions match the mode
                   if (actions.length === 0) return null;

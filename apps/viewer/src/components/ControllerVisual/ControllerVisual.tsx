@@ -5,6 +5,7 @@ import { TransformWrapper, TransformComponent, useControls } from 'react-zoom-pa
 import type { BindingIndex } from '@/lib/types/binding';
 import type { GameplayMode } from '@/lib/types/unified';
 import { useControllerVisualData } from './useControllerVisualData';
+import { SC_CONTEXT_GROUPS } from '@/lib/constants/scContextGroups';
 import { ControllerCanvas } from './ControllerCanvas';
 import { LayerBadge } from '@/components/shared/LayerBadge';
 import { CANVAS_WIDTH, CANVAS_HEIGHT } from './panelPositions';
@@ -55,9 +56,16 @@ export function ControllerVisual({ bindingIndex }: ControllerVisualProps) {
           aria-label="Filter by gameplay mode"
         >
           <option value="All">All Modes</option>
-          {data.modes.map((mode) => (
-            <option key={mode} value={mode}>{mode}</option>
-          ))}
+          <optgroup label="Game State">
+            {Object.entries(SC_CONTEXT_GROUPS).map(([key, group]) => (
+              <option key={key} value={key}>{group.label}</option>
+            ))}
+          </optgroup>
+          <optgroup label="Individual Mode">
+            {data.modes.map((mode) => (
+              <option key={mode} value={mode}>{mode}</option>
+            ))}
+          </optgroup>
         </select>
 
         {/* Search */}

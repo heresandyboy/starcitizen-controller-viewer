@@ -16,6 +16,7 @@ import {
 } from '@/lib/parsers';
 import { adaptGameActionsToSCDefaultActions } from '@/lib/adapters';
 import { ConfigSelector } from '@/components/ConfigSelector';
+import type { DescriptionsSidecar } from '@/lib/types/descriptions';
 
 const DEFAULT_XML = '/configs/layout_GCO-4-7-HOTAS.xml';
 const DEFAULT_REWASD = '/configs/GCO 4.7 HOTAS.rewasd';
@@ -34,11 +35,35 @@ interface LoadedData {
   bindingIndex: BindingIndex | null;
 }
 
+/**
+ * Derive the sidecar URL from a reWASD config URL.
+ * e.g., "/configs/GCO 4.7 HOTAS.rewasd" → "/configs/GCO 4.7 HOTAS.descriptions.json"
+ */
+function getDescriptionsSidecarUrl(rewasdUrl: string): string {
+  return rewasdUrl.replace(/\.rewasd$/, '.descriptions.json');
+}
+
+/**
+ * Apply custom descriptions from sidecar to resolved bindings.
+ */
+function applyCustomDescriptions(
+  index: BindingIndex,
+  sidecar: DescriptionsSidecar,
+): void {
+  for (const binding of index.all) {
+    const desc = sidecar.descriptions[binding.id];
+    if (desc) {
+      binding.customDescription = desc;
+    }
+  }
+}
+
 async function loadDefaultConfigs(): Promise<LoadedData> {
-  const [xmlRes, rewasdRes, defaultProfileRes] = await Promise.all([
+  const [xmlRes, rewasdRes, defaultProfileRes, descRes] = await Promise.all([
     fetch(DEFAULT_XML),
     fetch(DEFAULT_REWASD),
     fetch(DEFAULT_PROFILE_XML),
+    fetch(getDescriptionsSidecarUrl(DEFAULT_REWASD)).catch(() => null),
   ]);
 
   if (!xmlRes.ok) throw new Error(`Failed to load XML: ${xmlRes.statusText}`);
@@ -46,6 +71,16 @@ async function loadDefaultConfigs(): Promise<LoadedData> {
 
   const [xmlText, rewasdText] = await Promise.all([xmlRes.text(), rewasdRes.text()]);
   const defaultProfileText = defaultProfileRes.ok ? await defaultProfileRes.text() : '';
+
+  // Parse custom descriptions sidecar (optional)
+  let descriptionsSidecar: DescriptionsSidecar | null = null;
+  if (descRes && descRes.ok) {
+    try {
+      descriptionsSidecar = await descRes.json();
+    } catch {
+      console.warn('Failed to parse descriptions sidecar');
+    }
+  }
 
   // Parse SC defaults (fallback for keys not in custom XML)
   const scDefaults = defaultProfileText ? parseDefaultProfile(defaultProfileText) : [];
@@ -72,6 +107,11 @@ async function loadDefaultConfigs(): Promise<LoadedData> {
     const xmlParsed = parseStarCitizenXml(xmlText);
     const rewasdV2 = parseRewasdJsonV2(rewasdText);
     bindingIndex = resolveBindingsV2(rewasdV2, xmlParsed, scDefaults);
+
+    // Apply custom descriptions if sidecar available
+    if (bindingIndex && descriptionsSidecar) {
+      applyCustomDescriptions(bindingIndex, descriptionsSidecar);
+    }
   } catch (err) {
     console.error('V2 pipeline failed, Layer Browser unavailable:', err);
   }

@@ -147,6 +147,8 @@ export interface ResolvedBinding {
   source: BindingSource;
   /** French description from reWASD config (debug/secondary display). */
   description?: string;
+  /** Custom user description from .descriptions.json sidecar file. */
+  customDescription?: string;
 }
 
 /**
@@ -170,6 +172,8 @@ export interface ResolvedAction {
   resolvedVia: 'keyboard' | 'gamepad';
   /** The specific key or button that matched (e.g., "kb1_insert", "gp1_back"). */
   matchedInput: string;
+  /** Number of times this action was triggered in the macro (>1 for turbo/loop macros). */
+  repeatCount?: number;
 }
 
 // ---------------------------------------------------------------------------
