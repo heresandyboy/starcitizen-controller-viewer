@@ -36,107 +36,115 @@ export interface PanelPosition {
   group: 'stick-left' | 'stick-right' | 'dpad' | 'face' | 'bumper' | 'trigger' | 'special' | 'paddle' | 'axis';
 }
 
-/** Canvas dimensions for the poster layout */
-export const CANVAS_WIDTH = 1700;
-export const CANVAS_HEIGHT = 1150;
+/** Canvas dimensions for the poster layout — generous to give force layout room */
+export const CANVAS_WIDTH = 2400;
+export const CANVAS_HEIGHT = 1800;
 
 /** Controller illustration center point (px within canvas) */
-export const CONTROLLER_CENTER = { x: 850, y: 400 };
+export const CONTROLLER_CENTER = { x: 1200, y: 550 };
 
 /** Controller illustration size */
-export const CONTROLLER_WIDTH = 480;
-export const CONTROLLER_HEIGHT = Math.round(480 * (630 / 750));
+export const CONTROLLER_WIDTH = 520;
+export const CONTROLLER_HEIGHT = Math.round(520 * (630 / 750));
 
 /** Controller SVG viewBox dimensions (the illustration uses these coordinates) */
 export const SVG_VIEWBOX = { width: 600, height: 400 };
 
-/** Panel width constraint */
-export const PANEL_WIDTH = 240;
+/** Panel width constraint — wider for better readability */
+export const PANEL_WIDTH = 280;
 
 // Vertical spacing helper: small=35, medium=100, large=170
 // Controller exclusion zone: x=600-1100, y=155-605
 
+/**
+ * Ideal positions for panels — used as targets for the d3-force simulation.
+ * The force layout will adjust these to prevent overlap while keeping panels
+ * near their logical group region.
+ *
+ * Left-side panels use anchor='right' (leader line exits from right edge).
+ * Right-side panels use anchor='left' (leader line exits from left edge).
+ *
+ * With canvas 2400x1800 and controller at (1200,550):
+ *   Left zone:  x=0–620 (far left), x=620–920 (inner left)
+ *   Controller: x=940–1460, y=290–810
+ *   Right zone: x=1480–1780 (inner right), x=1780–2400 (far right)
+ *   Bottom:     y=820–1800
+ */
 export const PANEL_POSITIONS: Record<string, PanelPosition> = {
   // ═══════════════════════════════════════════════════════
-  // LEFT SIDE — Columns A (far) and B (inner)
+  // LEFT SIDE — far left and inner left
   // ═══════════════════════════════════════════════════════
 
-  // Left Stick Directions — Col A, top section
-  // (LSUp 4 entries ~70px, LSLeft/LSRight 5 entries ~85px, LSDown 5 entries ~85px)
-  LSUp:    { button: 'LSUp',    x: 250,  y: 5,    anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'stick-left' },
-  LSLeft:  { button: 'LSLeft',  x: 250,  y: 80,   anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'stick-left' },
-  LSDown:  { button: 'LSDown',  x: 250,  y: 170,  anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'stick-left' },
-  LSRight: { button: 'LSRight', x: 260,  y: 80,   anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'stick-left' },
+  // Left Stick Directions
+  LSUp:    { button: 'LSUp',    x: 290,  y: 10,   anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'stick-left' },
+  LSLeft:  { button: 'LSLeft',  x: 290,  y: 200,  anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'stick-left' },
+  LSDown:  { button: 'LSDown',  x: 290,  y: 400,  anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'stick-left' },
+  LSRight: { button: 'LSRight', x: 300,  y: 200,  anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'stick-left' },
 
-  // Axis panels — Col A/B, below stick directions
-  LSX:     { button: 'LSX',     x: 250,  y: 260,  anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'axis' },
-  LSY:     { button: 'LSY',     x: 260,  y: 170,  anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'axis' },
+  // Axis panels
+  LSX:     { button: 'LSX',     x: 290,  y: 580,  anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'axis' },
+  LSY:     { button: 'LSY',     x: 300,  y: 400,  anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'axis' },
 
-  // D-Pad — Col A, mid section
-  // (DpadUp 6 entries ~100px, DpadLeft 14 entries ~164px, DpadDown 12 ~164px, DpadRight 11 ~164px)
-  DpadUp:    { button: 'DpadUp',    x: 250,  y: 310,  anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'dpad' },
-  DpadLeft:  { button: 'DpadLeft',  x: 250,  y: 415,  anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'dpad' },
-  DpadDown:  { button: 'DpadDown',  x: 250,  y: 585,  anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'dpad' },
-  DpadRight: { button: 'DpadRight', x: 260,  y: 310,  anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'dpad' },
+  // D-Pad
+  DpadUp:    { button: 'DpadUp',    x: 290,  y: 700,  anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'dpad' },
+  DpadLeft:  { button: 'DpadLeft',  x: 290,  y: 880,  anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'dpad' },
+  DpadDown:  { button: 'DpadDown',  x: 290,  y: 1200, anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'dpad' },
+  DpadRight: { button: 'DpadRight', x: 300,  y: 700,  anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'dpad' },
 
   // ═══════════════════════════════════════════════════════
-  // LEFT-CENTER — Col C (next to controller)
+  // LEFT-CENTER — inner left, near controller
   // ═══════════════════════════════════════════════════════
 
-  // Triggers & Bumpers — Col C, top
-  LT:      { button: 'LT',      x: 570,  y: 5,    anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'trigger' },
-  LTAxis:  { button: 'LTAxis',  x: 570,  y: 115,  anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'axis' },
-  LB:      { button: 'LB',      x: 570,  y: 155,  anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'bumper' },
+  LT:      { button: 'LT',      x: 920,  y: 10,   anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'trigger' },
+  LTAxis:  { button: 'LTAxis',  x: 920,  y: 200,  anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'axis' },
+  LB:      { button: 'LB',      x: 920,  y: 320,  anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'bumper' },
 
-  // Special buttons — Col C, center
-  View:    { button: 'View',    x: 570,  y: 325,  anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'special' },
+  View:    { button: 'View',    x: 920,  y: 500,  anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'special' },
 
-  // Stick clicks & paddles — Col C, bottom
-  LS:      { button: 'LS',      x: 570,  y: 620,  anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'special' },
-  P1:      { button: 'P1',      x: 570,  y: 790,  anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'paddle' },
-  P3:      { button: 'P3',      x: 570,  y: 960,  anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'paddle' },
+  LS:      { button: 'LS',      x: 920,  y: 850,  anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'special' },
+  P1:      { button: 'P1',      x: 920,  y: 1100, anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'paddle' },
+  P3:      { button: 'P3',      x: 920,  y: 1350, anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'paddle' },
 
   // ═══════════════════════════════════════════════════════
   // CENTER — above/below controller
   // ═══════════════════════════════════════════════════════
 
-  Xbox:    { button: 'Xbox',    x: 730,  y: 620,  anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'special' },
-  'LT+RT': { button: 'LT+RT',  x: 730,  y: 5,    anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'axis' },
+  Xbox:    { button: 'Xbox',    x: 1100, y: 850,  anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'special' },
+  'LT+RT': { button: 'LT+RT',  x: 1100, y: 10,   anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'axis' },
 
   // ═══════════════════════════════════════════════════════
-  // RIGHT-CENTER — Col D (next to controller)
+  // RIGHT-CENTER — inner right, near controller
   // ═══════════════════════════════════════════════════════
 
-  RT:      { button: 'RT',      x: 1130, y: 5,    anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'trigger' },
-  RTAxis:  { button: 'RTAxis',  x: 1130, y: 115,  anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'axis' },
-  RB:      { button: 'RB',      x: 1130, y: 155,  anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'bumper' },
+  RT:      { button: 'RT',      x: 1480, y: 10,   anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'trigger' },
+  RTAxis:  { button: 'RTAxis',  x: 1480, y: 200,  anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'axis' },
+  RB:      { button: 'RB',      x: 1480, y: 320,  anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'bumper' },
 
-  Menu:    { button: 'Menu',    x: 1130, y: 325,  anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'special' },
+  Menu:    { button: 'Menu',    x: 1480, y: 500,  anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'special' },
 
-  RS:      { button: 'RS',      x: 1130, y: 620,  anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'special' },
-  P2:      { button: 'P2',      x: 1130, y: 790,  anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'paddle' },
-  P4:      { button: 'P4',      x: 1130, y: 960,  anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'paddle' },
+  RS:      { button: 'RS',      x: 1480, y: 850,  anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'special' },
+  P2:      { button: 'P2',      x: 1480, y: 1100, anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'paddle' },
+  P4:      { button: 'P4',      x: 1480, y: 1350, anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'paddle' },
 
   // ═══════════════════════════════════════════════════════
-  // RIGHT SIDE — Columns E (inner) and F (far)
+  // RIGHT SIDE — far right
   // ═══════════════════════════════════════════════════════
 
-  // Right Stick Directions — Col F, top section
-  RSUp:    { button: 'RSUp',    x: 1460, y: 5,    anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'stick-right' },
-  RSLeft:  { button: 'RSLeft',  x: 1440, y: 80,   anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'stick-right' },
-  RSDown:  { button: 'RSDown',  x: 1460, y: 170,  anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'stick-right' },
-  RSRight: { button: 'RSRight', x: 1460, y: 80,   anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'stick-right' },
+  // Right Stick Directions
+  RSUp:    { button: 'RSUp',    x: 2110, y: 10,   anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'stick-right' },
+  RSLeft:  { button: 'RSLeft',  x: 2100, y: 200,  anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'stick-right' },
+  RSDown:  { button: 'RSDown',  x: 2110, y: 400,  anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'stick-right' },
+  RSRight: { button: 'RSRight', x: 2110, y: 200,  anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'stick-right' },
 
   // Axis panels
-  RSX:     { button: 'RSX',     x: 1460, y: 260,  anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'axis' },
-  RSY:     { button: 'RSY',     x: 1440, y: 170,  anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'axis' },
+  RSX:     { button: 'RSX',     x: 2110, y: 580,  anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'axis' },
+  RSY:     { button: 'RSY',     x: 2100, y: 400,  anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'axis' },
 
-  // Face Buttons — Col F, mid section
-  // (Y 8 entries ~130px, X 13 ~164px, B 14 ~164px, A 14 ~164px)
-  Y:       { button: 'Y',       x: 1460, y: 310,  anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'face' },
-  X:       { button: 'X',       x: 1440, y: 310,  anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'face' },
-  B:       { button: 'B',       x: 1460, y: 480,  anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'face' },
-  A:       { button: 'A',       x: 1460, y: 650,  anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'face' },
+  // Face Buttons
+  Y:       { button: 'Y',       x: 2110, y: 700,  anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'face' },
+  X:       { button: 'X',       x: 2100, y: 700,  anchor: 'right', lineTarget: { x: 0, y: 0 }, group: 'face' },
+  B:       { button: 'B',       x: 2110, y: 1000, anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'face' },
+  A:       { button: 'A',       x: 2110, y: 1300, anchor: 'left',  lineTarget: { x: 0, y: 0 }, group: 'face' },
 };
 
 /** All button keys that have panel positions */

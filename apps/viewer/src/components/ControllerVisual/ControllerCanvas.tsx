@@ -13,6 +13,7 @@ import {
 } from './panelPositions';
 import { ControllerIllustration, getButtonOrStickCanvasPosition } from './ControllerIllustration';
 import { BindingPanel } from './BindingPanel';
+import { useForceLayout } from './useForceLayout';
 
 interface ControllerCanvasProps {
   panels: Map<string, ButtonPanelData>;
@@ -32,6 +33,9 @@ export function ControllerCanvas({
   const ctrlLeft = CONTROLLER_CENTER.x - CONTROLLER_WIDTH / 2;
   const ctrlTop = CONTROLLER_CENTER.y - CONTROLLER_HEIGHT / 2;
 
+  // Compute non-overlapping positions via d3-force simulation
+  const computedPositions = useForceLayout(panels, modeFilter);
+
   return (
     <div
       className="relative"
@@ -40,16 +44,17 @@ export function ControllerCanvas({
         height: CANVAS_HEIGHT,
       }}
     >
-      {/* Leader lines SVG (behind everything) */}
+      {/* Leader lines SVG (above controller, below panels) */}
       <svg
         className="absolute inset-0 pointer-events-none"
         width={CANVAS_WIDTH}
         height={CANVAS_HEIGHT}
-        style={{ zIndex: 1 }}
+        style={{ zIndex: 2 }}
       >
         {Array.from(panels.entries()).map(([button, panelData]) => {
+          const computed = computedPositions.get(button);
           const pos = PANEL_POSITIONS[button];
-          if (!pos || !panelData.hasBindings) return null;
+          if (!computed || !pos || !panelData.hasBindings) return null;
 
           // Get button position on the controller
           const target = getButtonOrStickCanvasPosition(
@@ -57,9 +62,13 @@ export function ControllerCanvas({
           );
           if (!target) return null;
 
-          // Panel edge point
-          const panelX = pos.anchor === 'right' ? pos.x : pos.x + PANEL_WIDTH;
-          const panelY = pos.y + 14;
+          // Panel edge point — use computed position
+          // Left-side panels: line connects from right edge; right-side panels: from left edge
+          const panelCenterX = computed.x + computed.width / 2;
+          const controllerCenterX = CONTROLLER_CENTER.x;
+          const isLeftOfController = panelCenterX < controllerCenterX;
+          const panelX = isLeftOfController ? computed.x + computed.width : computed.x;
+          const panelY = computed.y + 14;
 
           const isHl = highlightedButton === button;
 
@@ -89,10 +98,10 @@ export function ControllerCanvas({
         })}
       </svg>
 
-      {/* Controller illustration (centered, z-2) */}
+      {/* Controller illustration (centered, z-1 behind lines) */}
       <div
         className="absolute"
-        style={{ left: ctrlLeft, top: ctrlTop, zIndex: 2 }}
+        style={{ left: ctrlLeft, top: ctrlTop, zIndex: 1 }}
       >
         <ControllerIllustration
           highlightedButton={highlightedButton}
@@ -100,15 +109,15 @@ export function ControllerCanvas({
         />
       </div>
 
-      {/* Binding panels (z-3, above everything) */}
+      {/* Binding panels (z-3, above everything) — positioned by force layout */}
       {Array.from(panels.entries()).map(([button, panelData]) => {
-        const position = PANEL_POSITIONS[button];
-        if (!position) return null;
+        const computed = computedPositions.get(button);
+        if (!computed) return null;
         return (
           <div key={button} style={{ zIndex: 3 }}>
             <BindingPanel
               panelData={panelData}
-              position={position}
+              computedPosition={computed}
               modeFilter={modeFilter}
               searchQuery={searchQuery}
               onHover={onHoverButton}
